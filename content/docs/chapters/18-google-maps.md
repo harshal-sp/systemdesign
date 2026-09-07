@@ -49,9 +49,11 @@ Before jumping into the design, there are some map-related concepts we should un
 
 World is a sphere, rotating on its axis. Positiions are defined by latitude (how far north/south you are) and longitude (how far east/west you are):
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/18-google-maps/partitioning-system.png" alt="partitioning-system" width="500" />
-</div>
+
+
+![partitioning-system](/images/chapters/18-google-maps/partitioning-system.png)
+
+
 
 #### Going from 3D to 2D
 
@@ -59,9 +61,11 @@ The process of translating points from 3D to 2D plane is called "map projection"
 
 There are different ways to do it and each comes with its pros and cons. Almost all distort the actual geometry.
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/18-google-maps/map-projections.png" alt="map-projections" width="500" />
-</div>
+
+
+![map-projections](/images/chapters/18-google-maps/map-projections.png)
+
+
 
 Google maps selected a modified version of Mercator projection called "Web Mercator".
 
@@ -79,9 +83,11 @@ Geohashing is an encoding system which encodes a geographic area into a string o
 
 It depicts the world as a flattened surface and recursively sub-divides it into four quadrants:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/18-google-maps/geohashing.png" alt="geohashing" width="500" />
-</div>
+
+
+![geohashing](/images/chapters/18-google-maps/geohashing.png)
+
+
 
 #### Map rendering
 
@@ -97,9 +103,11 @@ Eg, zooming out the entire world would download only a single 256x256 tile, repr
 
 In most routing algorithms, intersections are represented as nodes and roads are represented as edges:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/18-google-maps/road-representation.png" alt="road-representation" width="500" />
-</div>
+
+
+![road-representation](/images/chapters/18-google-maps/road-representation.png)
+
+
 
 Most navigation algorithms use a modified version of Djikstra or A* algorithms.
 
@@ -109,17 +117,21 @@ Instead, we use a technique similar to tiling - we subdivide the world into smal
 
 Routing tiles hold references to neighboring tiles and algorithms can stitch together a bigger road graph as it traverses interconnected tiles:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/18-google-maps/routing-tiles.png" alt="routing-tiles" width="500" />
-</div>
+
+
+![routing-tiles](/images/chapters/18-google-maps/routing-tiles.png)
+
+
 
 This technique enables us to significantly reduce memory bandwidth and only load the tiles we need for the given source/destination pair.
 
 However, for larger routes, stitching together small, detailed routing tiles would still be time/memory consuming. Instead, there are routing tiles with different level of detail and the algorithm uses the appropriately-detailed tiles, based on the destination we're headed for:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/18-google-maps/map-routing-hierarchical.png" alt="map-routing-hierarchical" width="500" />
-</div>
+
+
+![map-routing-hierarchical](/images/chapters/18-google-maps/map-routing-hierarchical.png)
+
+
 
 ### **Back-of-the-envelope estimation**
 
@@ -135,15 +147,19 @@ Assuming gps update requests are batched, we arrive at 200k QPS and 1mil QPS at 
 
 ## Step 2: Propose High-Level Design and Get Buy-In
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/18-google-maps/high-level-design.png" alt="high-level-design" width="500" />
-</div>
+
+
+![high-level-design](/images/chapters/18-google-maps/high-level-design.png)
+
+
 
 ### **Location service**
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/18-google-maps/location-service.png" alt="location-service" width="500" />
-</div>
+
+
+![location-service](/images/chapters/18-google-maps/location-service.png)
+
+
 
 It is responsible for recording a user's location updates:
  * location updates are sent every `t` seconds
@@ -151,9 +167,11 @@ It is responsible for recording a user's location updates:
 
 Instead of sending location updates to the server all the time, we can batch the updates on the client-side and send batches instead:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/18-google-maps/location-update-batches.png" alt="location-update-batches" width="500" />
-</div>
+
+
+![location-update-batches](/images/chapters/18-google-maps/location-update-batches.png)
+
+
 
 Despite this optimization, for a system of Google Maps scale, load will still be significant. Therefore, we can leverage a database, optimized for heavy writes such as Cassandra.
 
@@ -219,23 +237,29 @@ How should the map tiles be served to the client?
  * They can be built dynamically, but that puts a huge load on the server and also makes caching hard
  * Map tiles are served statically, based on their geohash, which a client can calculate. They can be statically stored & served from a CDN
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/18-google-maps/static-map-tiles.png" alt="static-map-tiles" width="500" />
-</div>
+
+
+![static-map-tiles](/images/chapters/18-google-maps/static-map-tiles.png)
+
+
 
 CDNs enable users to fetch map tiles from point-of-presence servers (POP) which are closest to users in order to minimize latency:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/18-google-maps/cdn-vs-no-cdn.png" alt="cdn-vs-no-cdn" width="500" />
-</div>
+
+
+![cdn-vs-no-cdn](/images/chapters/18-google-maps/cdn-vs-no-cdn.png)
+
+
 
 Options to consider for determining map tiles:
  * geohash for map tile can be calculated on the client-side. If that's the case, we should be careful that we commit to this type of map tile calculation for the long-term as forcing clients to update is hard
  * alternatively, we can have simple API which calculates the map tile URLs on behalf of the clients at the cost of additional API call
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/18-google-maps/map-tile-url-calculation.png" alt="map-tile-url-calculation" width="500" />
-</div>
+
+
+![map-tile-url-calculation](/images/chapters/18-google-maps/map-tile-url-calculation.png)
+
+
 
 ---
 
@@ -263,9 +287,11 @@ We can use Cassandra for storing this kind of data as its nature is to be write-
 
 Example row:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/18-google-maps/user-location-data-torw.png" alt="user-location-data-row" width="500" />
-</div>
+
+
+![user-location-data-row](/images/chapters/18-google-maps/user-location-data-torw.png)
+
+
 
 #### Geocoding database
 
@@ -277,9 +303,11 @@ We can use Redis for its fast read access speed, as we have frequent read and in
 
 As we discussed, we will precompute map tiling images and store them in CDN.
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/18-google-maps/precomputed-map-tile-image.png" alt="precomputed-map-tile-image" width="500" />
-</div>
+
+
+![precomputed-map-tile-image](/images/chapters/18-google-maps/precomputed-map-tile-image.png)
+
+
 
 ### **Services**
 
@@ -287,9 +315,11 @@ As we discussed, we will precompute map tiling images and store them in CDN.
 
 Let's focus on the database design and how user location is stored in detail for this service.
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/18-google-maps/location-service-diagram.png" alt="location-service-diagram" width="500" />
-</div>
+
+
+![location-service-diagram](/images/chapters/18-google-maps/location-service-diagram.png)
+
+
 
 We can use a NoSQL database to facilitate the heavy write load we have on location updates. We prioritize availability over consistency as user location data often changes and becomes stale as new updates arrive.
 
@@ -297,18 +327,22 @@ We'll choose Cassandra as our database choice as it nicely fits all our requirem
 
 Example row we're going to store:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/18-google-maps/user-location-row-example.png" alt="user-location-row-example" width="500" />
-</div>
+
+
+![user-location-row-example](/images/chapters/18-google-maps/user-location-row-example.png)
+
+
 
  * `user_id` is the partition key in order to quickly access all location updates for a particular user
  * `timestamp` is the clustering key in order to store the data sorted by the time a location update is received
 
 We also leverage Kafka to stream location updates to various other service which need the location updates for various purposes:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/18-google-maps/location-update-streaming.png" alt="location-update-streaming" width="500" />
-</div>
+
+
+![location-update-streaming](/images/chapters/18-google-maps/location-update-streaming.png)
+
+
 
 #### Rendering map
 
@@ -316,9 +350,11 @@ Map tiles are stored at various zoom levels. At the lowest zoom level, the entir
 
 As zoom levels increase, the number of map tiles quadruples:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/18-google-maps/zoom-level-increases.png" alt="zoom-level-increases" width="500" />
-</div>
+
+
+![zoom-level-increases](/images/chapters/18-google-maps/zoom-level-increases.png)
+
+
 
 One optimization we can use is to not send the entire image information over the network, but instead represent tiles as vectors (paths & polygons) and let the client render the tiles dynamically.
 
@@ -328,9 +364,11 @@ This will have substantial bandwidth savings.
 
 This service is responsible for finding the fastest routes:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/18-google-maps/navigation-service.png" alt="navigation-service" width="500" />
-</div>
+
+
+![navigation-service](/images/chapters/18-google-maps/navigation-service.png)
+
+
 
 Let's go through each component in this sub-system.
 
@@ -384,9 +422,11 @@ The shortest-path service runs a variation of the A* algorithm against the routi
  * It receives the source/destination pairs, converts them to lat/long pairs and derives the geohashes from those pairs to derive the routing tiles
  * The algorithm starts from the initial routing tile and starts traversing it until a good enough path is found to the destination tile
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/18-google-maps/shortest-path-service.png" alt="shortest-path-service" width="500" />
-</div>
+
+
+![shortest-path-service](/images/chapters/18-google-maps/shortest-path-service.png)
+
+
 
 The ETA service is called by the route planner to get estimated time based on machine learning algorithms, predicting ETA based on traffic data.
 
@@ -418,9 +458,11 @@ To reduce the amount of tiles we store in the database, we can instead store the
 user_1, r_1, super(r_1), super(super(r_1)), ...
 ```
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/18-google-maps/adaptive-eta-data-storage.png" alt="adaptive-eta-data-storage" width="500" />
-</div>
+
+
+![adaptive-eta-data-storage](/images/chapters/18-google-maps/adaptive-eta-data-storage.png)
+
+
 
 Using this, we only need to check if the final tile of a user includes the traffic accident tile to see if user is impacted.
 
@@ -439,8 +481,10 @@ We have several options, which enable us to proactively push data to clients fro
 
 This is our final design:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/18-google-maps/final-design.png" alt="final-design" width="500" />
-</div>
+
+
+![final-design](/images/chapters/18-google-maps/final-design.png)
+
+
 
 One additional feature we could provide is multi-stop navigation which can be sold to enterprise customers such as Uber or Lyft in order to determine optimal path for visiting a set of locations.

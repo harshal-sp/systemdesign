@@ -59,9 +59,11 @@ What requirements are out of scope?
 ### **Fundamentals**
 There are five core components involved in a metrics monitoring and alerting system:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/20-metrics-monitoring-and-alerting-system/metrics-monitoring-core-components.png" alt="metrics-monitoring-core-components" width="500" />
-</div>
+
+
+![metrics-monitoring-core-components](/images/chapters/20-metrics-monitoring-and-alerting-system/metrics-monitoring-core-components.png)
+
+
 
  - **Data collection**: collect metrics data from different sources
  - **Data transmission**: transfer data from sources to the metrics monitoring system
@@ -75,15 +77,19 @@ The series can be identified by name and an optional set of tags.
 
 Example 1 - What is the CPU load on production server instance i631 at 20:00?
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/20-metrics-monitoring-and-alerting-system/metrics-example-1.png" alt="metrics-example-1" width="500" />
-</div>
+
+
+![metrics-example-1](/images/chapters/20-metrics-monitoring-and-alerting-system/metrics-example-1.png)
+
+
 
 The data can be identified by the following table:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/20-metrics-monitoring-and-alerting-system/metrics-example-1-data.png" alt="metrics-example-1-data" width="500" />
-</div>
+
+
+![metrics-example-1-data](/images/chapters/20-metrics-monitoring-and-alerting-system/metrics-example-1-data.png)
+
+
 
 The time series is identified by the metric name, labels and a single point in at a specific time.
 
@@ -112,15 +118,19 @@ The format shown above is called the line protocol and is used by many popular m
 
 What every time series consists of:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/20-metrics-monitoring-and-alerting-system/time-series-data-example.png" alt="time-series-data-example" width="500" />
-</div>
+
+
+![time-series-data-example](/images/chapters/20-metrics-monitoring-and-alerting-system/time-series-data-example.png)
+
+
 
 A good way to visualize how data looks like:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/20-metrics-monitoring-and-alerting-system/time-series-data-viz.png" alt="time-series-data-viz" width="500" />
-</div>
+
+
+![time-series-data-viz](/images/chapters/20-metrics-monitoring-and-alerting-system/time-series-data-viz.png)
+
+
 
  - The x axis is the time
  - the y axis is the dimension you're querying - eg metric name, tag, etc.
@@ -139,9 +149,11 @@ There are many databases, specifically tailored for storing time-series data. Ma
 
 Example scale of InfluxDB - more than 250k writes per second when provisioned with 8 cores and 32gb RAM:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/20-metrics-monitoring-and-alerting-system/influxdb-scale.png" alt="influxdb-scale" width="500" />
-</div>
+
+
+![influxdb-scale](/images/chapters/20-metrics-monitoring-and-alerting-system/influxdb-scale.png)
+
+
 
 It is not expected for you to understand the internals of a metrics database as it is niche knowledge. You might be asked only if you've mentioned it on your resume.
 
@@ -154,9 +166,11 @@ It is critical, however, to keep the cardinality of labels low - ie, not using t
 
 ### **High-level Design**
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/20-metrics-monitoring-and-alerting-system/high-level-design.png" alt="high-level-design" width="500" />
-</div>
+
+
+![high-level-design](/images/chapters/20-metrics-monitoring-and-alerting-system/high-level-design.png)
+
+
 
  - **Metrics source**: can be application servers, SQL databases, message queues, etc.
  - **Metrics collector**: Gathers metrics data and writes to time-series database
@@ -173,32 +187,40 @@ Let's deep dive into several of the more interesting parts of the system.
 ### **Metrics collection**
 For metrics collection, occasional data loss is not critical. It's acceptable for clients to fire and forget.
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/20-metrics-monitoring-and-alerting-system/metrics-collection.png" alt="metrics-collection" width="500" />
-</div>
+
+
+![metrics-collection](/images/chapters/20-metrics-monitoring-and-alerting-system/metrics-collection.png)
+
+
 
 There are two ways to implement metrics collection - pull or push.
 
 Here's how the pull model might look like:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/20-metrics-monitoring-and-alerting-system/pull-model-example.png" alt="pull-model-example" width="500" />
-</div>
+
+
+![pull-model-example](/images/chapters/20-metrics-monitoring-and-alerting-system/pull-model-example.png)
+
+
 
 For this solution, the metrics collector needs to maintain an up-to-date list of services and metrics endpoints.
 We can use Zookeeper or etcd for that purpose - service discovery.
 
 Service discovery contains contains configuration rules about when and where to collect metrics from:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/20-metrics-monitoring-and-alerting-system/service-discovery-example.png" alt="service-discovery-example" width="500" />
-</div>
+
+
+![service-discovery-example](/images/chapters/20-metrics-monitoring-and-alerting-system/service-discovery-example.png)
+
+
 
 Here's a detailed explanation of the metrics collection flow:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/20-metrics-monitoring-and-alerting-system/metrics-collection-flow.png" alt="metrics-collection-flow" width="500" />
-</div>
+
+
+![metrics-collection-flow](/images/chapters/20-metrics-monitoring-and-alerting-system/metrics-collection-flow.png)
+
+
 
  - Metrics collector fetches configuration metadata from service discovery. This includes pulling interval, IP addresses, timeout & retry params.
  - Metrics collector pulls metrics data via a pre-defined http endpoint (eg `/metrics`). This is typically done by a client library.
@@ -210,22 +232,28 @@ However, there must also be some kind of synchronization among them so that two 
 
 One solution for this is to position collectors and servers on a consistent hash ring and associate a set of servers with a single collector only:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/20-metrics-monitoring-and-alerting-system/consistent-hash-ring.png" alt="consistent-hash-ring" width="500" />
-</div>
+
+
+![consistent-hash-ring](/images/chapters/20-metrics-monitoring-and-alerting-system/consistent-hash-ring.png)
+
+
 
 With the push model, on the other hand, services push their metrics to the metrics collector proactively:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/20-metrics-monitoring-and-alerting-system/push-model-example.png" alt="push-model-example" width="500" />
-</div>
+
+
+![push-model-example](/images/chapters/20-metrics-monitoring-and-alerting-system/push-model-example.png)
+
+
 
 In this approach, typically a collection agent is installed alongside service instances. 
 The agent collects metrics from the server and pushes them to the metrics collector.
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/20-metrics-monitoring-and-alerting-system/metrics-collector-agent.png" alt="metrics-collector-agent" width="500" />
-</div>
+
+
+![metrics-collector-agent](/images/chapters/20-metrics-monitoring-and-alerting-system/metrics-collector-agent.png)
+
+
 
 With this model, we can potentially aggregate metrics before sending them to the collector, which reduces the volume of data processed by the collector.
 
@@ -250,17 +278,21 @@ There is no clear winner. A large organization probably needs to support both. T
 
 ### **Scale the metrics transmission pipeline**
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/20-metrics-monitoring-and-alerting-system/metrics-transmission-pipeline.png" alt="metrics-transmission-pipeline" width="500" />
-</div>
+
+
+![metrics-transmission-pipeline](/images/chapters/20-metrics-monitoring-and-alerting-system/metrics-transmission-pipeline.png)
+
+
 
 The metrics collector is provisioned in an auto-scaling group, regardless if we use the push or pull model.
 
 There is a chance of data loss if the time-series DB is down, however. To mitigate this, we'll provision a queuing mechanism:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/20-metrics-monitoring-and-alerting-system/queuing-mechanism.png" alt="queuing-mechanism" width="500" />
-</div>
+
+
+![queuing-mechanism](/images/chapters/20-metrics-monitoring-and-alerting-system/queuing-mechanism.png)
+
+
 
  - Metrics collectors push metrics data into kafka
  - Consumers or stream processing services such as Apache Storm, Flink or Spark process the data and push it to the time-series DB
@@ -273,9 +305,11 @@ This approach has several advantages:
 Kafka can be configured with one partition per metric name, so that consumers can aggregate data by metric names.
 To scale this, we can further partition by tags/labels and categorize/prioritize metrics to be collected first.
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/20-metrics-monitoring-and-alerting-system/metrics-collection-kafka.png" alt="metrics-collection-kafka" width="500" />
-</div>
+
+
+![metrics-collection-kafka](/images/chapters/20-metrics-monitoring-and-alerting-system/metrics-collection-kafka.png)
+
+
 
 The main downside of using Kafka for this problem is the maintenance/operation overhead.
 An alternative is to use a large-scale ingestion system like [Gorilla](https://www.vldb.org/pvldb/vol8/p1816-teller.pdf).
@@ -292,9 +326,11 @@ Having a separate query service from the time-series DB decouples the visualizat
 
 We can add a Cache layer here to reduce the load to the time-series database:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/20-metrics-monitoring-and-alerting-system/cache-layer-query-service.png" alt="cache-layer-query-service" width="500" />
-</div>
+
+
+![cache-layer-query-service](/images/chapters/20-metrics-monitoring-and-alerting-system/cache-layer-query-service.png)
+
+
 
 We can also avoid adding a query service altogether as most visualization and alerting systems have powerful plugins to integrate with most time-series databases.
 With a well-chosen time-series DB, we might not need to introduce our own caching layer as well.
@@ -342,9 +378,11 @@ Regardless of the database we choose, there are some optimizations we might empl
 
 Data encoding and compression can significantly reduce the size of data. Those features are usually built into a good time-series database.
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/20-metrics-monitoring-and-alerting-system/double-delta-encoding.png" alt="double-delta-encoding" width="500" />
-</div>
+
+
+![double-delta-encoding](/images/chapters/20-metrics-monitoring-and-alerting-system/double-delta-encoding.png)
+
+
 
 In the above example, instead of storing full timestamps, we can store timestamp deltas.
 
@@ -375,9 +413,11 @@ Finally, we can also use cold storage to use old data, which is no longer used. 
 
 ### **Alerting system**
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/20-metrics-monitoring-and-alerting-system/alerting-system.png" alt="alerting-system" width="500" />
-</div>
+
+
+![alerting-system](/images/chapters/20-metrics-monitoring-and-alerting-system/alerting-system.png)
+
+
 
 Configuration is loaded to cache servers. Rules are typically defined in YAML format. Here's an example:
 
@@ -411,9 +451,11 @@ In the real-world, there are many off-the-shelf solutions for alerting systems. 
 ### **Visualization system**
 The visualization system shows metrics and alerts over a time period. Here's an dashboard built with Grafana:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/20-metrics-monitoring-and-alerting-system/grafana-dashboard.png" alt="grafana-dashboard" width="500" />
-</div>
+
+
+![grafana-dashboard](/images/chapters/20-metrics-monitoring-and-alerting-system/grafana-dashboard.png)
+
+
 
 A high-quality visualization system is very hard to build. It is hard to justify not using an off-the-shelf solution like Grafana.
 
@@ -422,6 +464,8 @@ A high-quality visualization system is very hard to build. It is hard to justify
 ## Step 4: Wrap up
 Here's our final design:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/20-metrics-monitoring-and-alerting-system/final-design.png" alt="final-design" width="500" />
-</div>
+
+
+![final-design](/images/chapters/20-metrics-monitoring-and-alerting-system/final-design.png)
+
+

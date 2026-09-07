@@ -8,9 +8,11 @@ description: "System design architecture and deep-dive analysis for Digital Wall
 
 You can also use it to pay for goods & services or transfer money to other users, who use the **digital wallet** service. That can be faster and cheaper than doing it via normal payment rails.
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/27-digital-wallet/digital-wallet.png" alt="digital-wallet" width="500" />
-</div>
+
+
+![digital-wallet](/images/chapters/27-digital-wallet/digital-wallet.png)
+
+
 
 ---
 
@@ -86,24 +88,30 @@ Zookeeper can be used to store the number of partitions and addresses of redis n
 
 Finally, a wallet service is a stateless service responsible for carrying out transfer operations. It can easily scale horizontally:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/27-digital-wallet/wallet-service.png" alt="wallet-service" width="500" />
-</div>
+
+
+![wallet-service](/images/chapters/27-digital-wallet/wallet-service.png)
+
+
 
 Although this solution addresses scalability concerns, it doesn't allow us to execute balance transfers atomically.
 
 ### **Distributed transactions**
 One approach for handling transactions is to use the two-phase commit protocol on top of standard, sharded relational databases:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/27-digital-wallet/distributed-transactions-relational-dbs.png" alt="distributed-transactions-relational-dbs" width="500" />
-</div>
+
+
+![distributed-transactions-relational-dbs](/images/chapters/27-digital-wallet/distributed-transactions-relational-dbs.png)
+
+
 
 Here's how the two-phase commit (2PC) protocol works:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/27-digital-wallet/2pc-protocol.png" alt="2pc-protocol" width="500" />
-</div>
+
+
+![2pc-protocol](/images/chapters/27-digital-wallet/2pc-protocol.png)
+
+
 
  * Coordinator (wallet service) performs read and write operations on multiple databases as normal
  * When application is ready to commit the transaction, coordinator asks all databases to prepare it
@@ -131,27 +139,33 @@ Here's how TC/C works in phases:
 
 Phase 1 - try:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/27-digital-wallet/try-phase.png" alt="try-phase" width="500" />
-</div>
+
+
+![try-phase](/images/chapters/27-digital-wallet/try-phase.png)
+
+
 
  * coordinator starts local transaction in A's DB to reduce A's balance by 1$
  * C's DB is given a NOP instruction, which does nothing
 
 Phase 2a - confirm:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/27-digital-wallet/confirm-phase.png" alt="confirm-phase" width="500" />
-</div>
+
+
+![confirm-phase](/images/chapters/27-digital-wallet/confirm-phase.png)
+
+
 
  * if both DBs replied with "yes", confirm phase starts.
  * A's DB receives NOP, whereas C's DB is instructed to increase C's balance by 1$ (local transaction)
 
 Phase 2b - cancel:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/27-digital-wallet/cancel-phase.png" alt="cancel-phase" width="500" />
-</div>
+
+
+![cancel-phase](/images/chapters/27-digital-wallet/cancel-phase.png)
+
+
 
  * If any of the operations in phase 1 fails, the cancel phase starts.
  * A's DB is instructed to increase A's balance by 1$, C's DB receives NOP
@@ -173,9 +187,11 @@ Other properties of TC/C:
 If the coordinator dies mid-flight, it needs to recover its intermediary state. 
 That can be done by maintaining phase status tables, atomically updated within the database shards:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/27-digital-wallet/phase-status-tables.png" alt="phase-status-tables" width="500" />
-</div>
+
+
+![phase-status-tables](/images/chapters/27-digital-wallet/phase-status-tables.png)
+
+
 
 What does that table contain:
  * ID and content of distributed transaction
@@ -186,9 +202,11 @@ What does that table contain:
 
 One caveat when using TC/C is that there is a brief moment where the account states are inconsistent with each other while a distributed transaction is in-flight:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/27-digital-wallet/unbalanced-state.png" alt="unbalanced-state" width="500" />
-</div>
+
+
+![unbalanced-state](/images/chapters/27-digital-wallet/unbalanced-state.png)
+
+
 
 This is fine as long as we always recover from this state and that users cannot use the intermediary state to eg spend it. 
 This is guaranteed by always executing deductions prior to additions.
@@ -203,9 +221,11 @@ Note that choice 3 from table above is invalid because we cannot guarantee atomi
 
 One edge-case to address is out of order execution:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/27-digital-wallet/out-of-order-execution.png" alt="out-of-order-execution" width="500" />
-</div>
+
+
+![out-of-order-execution](/images/chapters/27-digital-wallet/out-of-order-execution.png)
+
+
 
 It is possible that a database receives a cancel operation, before receiving a try. This edge case can be handled by adding an out of order flag in our phase status table.
 When we receive a try operation, we first check if the out of order flag is set and if so, a failure is returned.
@@ -218,9 +238,11 @@ Here's how it works:
  * operations are executed from first to last
  * when an operation fails, the entire process starts to roll back until the beginning with compensating operations
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/27-digital-wallet/saga.png" alt="saga" width="500" />
-</div>
+
+
+![saga](/images/chapters/27-digital-wallet/saga.png)
+
+
 
 How do we coordinate the workflow? There are two approaches we can take:
  * Choreography - all services involved in a saga subscribe to the related events and do their part in the saga
@@ -264,27 +286,35 @@ It consists of four concepts:
  * state machine - drives the event sourcing process. It mainly validates commands and applies events to update the system state.
    * the state machine should be deterministic, hence, it shouldn't read external IO or rely on randomness. 
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/27-digital-wallet/event-sourcing.png" alt="event-sourcing" width="500" />
-</div>
+
+
+![event-sourcing](/images/chapters/27-digital-wallet/event-sourcing.png)
+
+
 
 Here's a dynamic view of event sourcing:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/27-digital-wallet/dynamic-event-sourcing.png" alt="dynamic-event-sourcing" width="500" />
-</div>
+
+
+![dynamic-event-sourcing](/images/chapters/27-digital-wallet/dynamic-event-sourcing.png)
+
+
 
 For our wallet service, the commands are balance transfer requests. We can put them in a FIFO queue, such as Kafka:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/27-digital-wallet/command-queue.png" alt="command-queue" width="500" />
-</div>
+
+
+![command-queue](/images/chapters/27-digital-wallet/command-queue.png)
+
+
 
 Here's the full picture:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/27-digital-wallet/wallet-service-state-macghine.png" alt="wallet-service-state-machine" width="500" />
-</div>
+
+
+![wallet-service-state-machine](/images/chapters/27-digital-wallet/wallet-service-state-macghine.png)
+
+
 
  * state machine reads commands from the command queue
  * balance state is read from the database
@@ -296,9 +326,11 @@ The main advantage of using event sourcing is its reproducibility. In this desig
 Historical balances can always be reconstructed by replaying events from the beginning. 
 Because the event list is immutable and the state machine is deterministic, we are guaranteed to succeed in replaying any of the intermediary states.
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/27-digital-wallet/historical-states.png" alt="historical-states" width="500" />
-</div>
+
+
+![historical-states](/images/chapters/27-digital-wallet/historical-states.png)
+
+
 
 All audit-related questions asked in the beginning of the section can be addressed by relying on event sourcing:
  * Do we know the account balance at any given time? - events can be replayed from the start until the point which we are interested in
@@ -307,9 +339,11 @@ All audit-related questions asked in the beginning of the section can be address
 
 Answering client queries about their balance can be addressed using the CQRS architecture - there can be multiple read-only state machines which are responsible for querying the historical state, based on the immutable events list:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/27-digital-wallet/cqrs-architecture.png" alt="cqrs-architecture" width="500" />
-</div>
+
+
+![cqrs-architecture](/images/chapters/27-digital-wallet/cqrs-architecture.png)
+
+
 
 ---
 
@@ -325,24 +359,30 @@ The next optimization is to cache recent commands and events in-memory in order 
 
 At a low-level, we can achieve the aforementioned optimizations by leveraging a command called mmap, which stores data in local disk as well as cache it in-memory:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/27-digital-wallet/mmap-optimization.png" alt="mmap-optimization" width="500" />
-</div>
+
+
+![mmap-optimization](/images/chapters/27-digital-wallet/mmap-optimization.png)
+
+
 
 The next optimization we can do is also store state in the local file system using SQLite - a file-based local relational database. RocksDB is also another good option.
 
 For our purposes, we'll choose RocksDB because it uses a log-structured merge-tree (LSM), which is optimized for write operations.
 Read performance is optimized via caching.
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/27-digital-wallet/rocks-db-approach.png" alt="rocks-db-approach" width="500" />
-</div>
+
+
+![rocks-db-approach](/images/chapters/27-digital-wallet/rocks-db-approach.png)
+
+
 
 To optimize the reproducibility, we can periodically save snapshots to disk so that we don't have to reproduce a given state from the very beginning every time. We could store snapshots as large binary files in distributed file storage, eg HDFS:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/27-digital-wallet/snapshot-approach.png" alt="snapshot-approach" width="500" />
-</div>
+
+
+![snapshot-approach](/images/chapters/27-digital-wallet/snapshot-approach.png)
+
+
 
 ### **Reliable high-performance event sourcing**
 All the optimizations done so far are great, but they make our service stateful. We need to introduce some form of replication for reliability purposes.
@@ -361,9 +401,11 @@ To achieve this, we can employ a consensus algorithm, such as Raft.
 With Raft, there is a leader who is active and there are followers who are passive. If a leader dies, one of the followers picks up. 
 As long as more than half of the nodes are up, the system continues running.
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/27-digital-wallet/raft-replication.png" alt="raft-replication" width="500" />
-</div>
+
+
+![raft-replication](/images/chapters/27-digital-wallet/raft-replication.png)
+
+
 
 With this approach, all nodes update the state, based on the events list. Raft ensures leader and followers have the same events list.
 
@@ -376,29 +418,37 @@ Some limitations we have to tackle:
 
 Polling is not real-time, hence, it can take a while for a user to learn about an update in their balance. Also, it can overload the query services if the polling frequency is too high:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/27-digital-wallet/polling-approach.png" alt="polling-approach" width="500" />
-</div>
+
+
+![polling-approach](/images/chapters/27-digital-wallet/polling-approach.png)
+
+
 
 To mitigate the system load, we can introduce a reverse proxy, which sends commands on behalf of the user and polls for response on their behalf:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/27-digital-wallet/reverse-proxy.png" alt="reverse-proxy" width="500" />
-</div>
+
+
+![reverse-proxy](/images/chapters/27-digital-wallet/reverse-proxy.png)
+
+
 
 This alleviates the system load as we could fetch data for multiple users using a single request, but it still doesn't solve the real-time receipt requirement.
 
 One final change we could do is make the read-only state machines push responses back to the reverse proxy once it's available. This can give the user the sense that updates happen real-time:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/27-digital-wallet/push-state-machines.png" alt="push-state-machines" width="500" />
-</div>
+
+
+![push-state-machines](/images/chapters/27-digital-wallet/push-state-machines.png)
+
+
 
 Finally, to scale the system even further, we can shard the system into multiple raft groups, where we implement distributed transactions on top of them using an orchestrator either via TC/C or Sagas:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/27-digital-wallet/sharded-raft-groups.png" alt="sharded-raft-groups" width="500" />
-</div>
+
+
+![sharded-raft-groups](/images/chapters/27-digital-wallet/sharded-raft-groups.png)
+
+
 
 Here's an example lifecycle of a balance transfer request in our final system:
  * User A sends a distributed transaction to the Saga coordinator with two operations - `A-1` and `C+1`.

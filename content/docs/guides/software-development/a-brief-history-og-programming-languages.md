@@ -13,7 +13,11 @@ tags:
 
 C, C++, Java, Javascript, Typescript, Golang, Rust, how do programming languages evolve for the past 70 years?
 
-<img src="https://assets.bytebytego.com/diagrams/0305-programming-languages.png" alt="Programming Languages History">
+
+
+![Programming Languages History](https://assets.bytebytego.com/diagrams/0305-programming-languages.png)
+
+
 
 *   Perforated cards were the first generation of programming languages. Assembly languages, which are machine-oriented, are the second generation of programming language. Third-generation languages, which are human-oriented, have been around since 1957.
 

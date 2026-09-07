@@ -37,9 +37,11 @@ At the high-level, the system is broken down into two services:
 ---
 
 ### Data Gathering Service
-<div style="margin-left:3rem">
-    <img src="/images/chapters/13-search-autocomplete/data-gathering.png" alt="Data Gathering" width="600">
-</div>
+
+
+![Data Gathering](/images/chapters/13-search-autocomplete/data-gathering.png)
+
+
 
 - Aggregates query data from analytics logs and updates the frequency table.
 - Processes historical data weekly to build a **trie** (prefix tree).
@@ -49,8 +51,16 @@ At the high-level, the system is broken down into two services:
 
 ### Query Service
 <div style="margin-left:3rem">
-    <img src="/images/chapters/13-search-autocomplete/frequency-table.png" alt="Frequency Table" width="400">
-    <img src="/images/chapters/13-search-autocomplete/basic-search-suggestions.png" alt="Search Suggestions" width="360">
+    
+
+![Frequency Table](/images/chapters/13-search-autocomplete/frequency-table.png)
+
+
+    
+
+![Search Suggestions](/images/chapters/13-search-autocomplete/basic-search-suggestions.png)
+
+
 </div>
 
 - Uses the frequency table from data gathering service.
@@ -71,9 +81,11 @@ The **trie** is a tree-like data structure used to store and retrieve query stri
 2. **Frequency Information:** Stores the popularity of queries at each node.
 
 4. **Steps to get top k most searched queries**
-   <div style="margin-left:3rem">
-      <img src="/images/chapters/13-search-autocomplete/trie-structure.png" alt="Trie Structure" width="500">
-   </div>
+   
+
+![Trie Structure](/images/chapters/13-search-autocomplete/trie-structure.png)
+
+
 
     - Find the prefix
     - Traverse the subtree from prefix node to get all valid children
@@ -83,7 +95,11 @@ The **trie** is a tree-like data structure used to store and retrieve query stri
 3. **Optimizations:**
    - Cache top-k queries at each node to speed up retrieval and avoid traversing the whole trie.
 
-        <img src="/images/chapters/13-search-autocomplete/cached-trie.png" alt="Cached Trie" width="600">
+        
+
+![Cached Trie](/images/chapters/13-search-autocomplete/cached-trie.png)
+
+
 
    - Limit prefix length to reduce search space as users rarely type a loong search query (say 50).
 
@@ -93,9 +109,11 @@ The **trie** is a tree-like data structure used to store and retrieve query stri
     - The source of data is from Analytics Log/DB.
 2. **Update:** Rarely updated in real-time; weekly updates replace old data.
 3. **Delete:** 
-      <div style="margin-left:3rem">
-         <img src="/images/chapters/13-search-autocomplete/delete-kv.png" alt="Delete KV" width="500">
-      </div>
+      
+
+![Delete KV](/images/chapters/13-search-autocomplete/delete-kv.png)
+
+
 
     - Filters remove unwanted or harmful suggestions (e.g., hate speech).
     - Having a filter layer gives us the flexibility of removing results based on different filter rules.
@@ -135,9 +153,11 @@ In the high-level design, whenever a user types a search query, data is updated 
 
 #### Updated Design
 
-<div style="margin-left:3rem">
-   <img src="/images/chapters/13-search-autocomplete/data-gathering-flow.png" alt="Updated Data Gathering Flow" width="600">
-</div>
+
+
+![Updated Data Gathering Flow](/images/chapters/13-search-autocomplete/data-gathering-flow.png)
+
+
 
 1. **Analytics Logs:**
    - Stores raw query data as logs for weekly aggregation.
@@ -157,7 +177,11 @@ In the high-level design, whenever a user types a search query, data is updated 
             - Every prefix in the trie is mapped to a key in a hash table.
             - Data on each trie node is mapped to a value in a hash table.
 
-                <img src="/images/chapters/13-search-autocomplete/trie-db.png" alt="Trie DB" width="600">
+                
+
+![Trie DB](/images/chapters/13-search-autocomplete/trie-db.png)
+
+
 ---
 
 ### Scalability
@@ -165,9 +189,11 @@ In the high-level design, whenever a user types a search query, data is updated 
    - Distribute trie nodes across servers based on prefix ranges (e.g., `a-m`, `n-z`).
    - Further shard within prefixes to balance uneven distributions (e.g., `aa-ag`, `ah-an`).
 2. **Load Balancing:**
-   <div style="margin-left:3rem">
-      <img src="/images/chapters/13-search-autocomplete/sharding.png" alt="Sharding" width="400">
-   </div>
+   
+
+![Sharding](/images/chapters/13-search-autocomplete/sharding.png)
+
+
 
    - Use a shard map manager to route requests to the appropriate server.
 

@@ -50,9 +50,11 @@ There are various protocols used for sending and receiving emails:
 
 Apart from the mailing protocol, there are some DNS records we need to configure for our email server - the MX records:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/23-distributed-email-service/dns-lookup.png" alt="dns-lookup" width="500" />
-</div>
+
+
+![dns-lookup](/images/chapters/23-distributed-email-service/dns-lookup.png)
+
+
 
 Email attachments are sent base64-encoded and there is usually a size limit of 25mb on most mail services.
 This is configurable and varies from individual to corporate accounts.
@@ -61,9 +63,11 @@ This is configurable and varies from individual to corporate accounts.
 
 Traditional mail servers work well when there are a limited number of users, connected to a single server.
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/23-distributed-email-service/traditional-mail-server.png" alt="traditional-mail-server" width="500" />
-</div>
+
+
+![traditional-mail-server](/images/chapters/23-distributed-email-service/traditional-mail-server.png)
+
+
 
 - Alice logs into her Outlook email and presses "send". Email is sent to Outlook mail server. Communication is via SMTP.
 - Outlook server queries DNS to find MX record for gmail.com and transfers the email to their servers. Communication is via SMTP.
@@ -71,9 +75,11 @@ Traditional mail servers work well when there are a limited number of users, con
 
 In traditional mail servers, emails were stored on the local file system. Every email was a separate file.
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/23-distributed-email-service/local-dir-storage.png" alt="local-dir-storage" width="500" />
-</div>
+
+
+![local-dir-storage](/images/chapters/23-distributed-email-service/local-dir-storage.png)
+
+
 
 As the scale grew, disk I/O became a bottleneck. Also, it doesn't satisfy our high availability and reliability requirements.
 Disks can be damaged and server can go down.
@@ -120,9 +126,11 @@ Example response:
 
 Here's the high-level design of the distributed mail server:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/23-distributed-email-service/high-level-architecture.png" alt="high-level-architecture" width="500" />
-</div>
+
+
+![high-level-architecture](/images/chapters/23-distributed-email-service/high-level-architecture.png)
+
+
 
 - **Webmail** - users use web browsers to send/receive emails
 - **Web servers** - public-facing request/response services used to manage login, signup, user profile, etc.
@@ -134,9 +142,11 @@ Here's the high-level design of the distributed mail server:
 
 Here's what the email sending flow looks like:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/23-distributed-email-service/email-sending-flow.png" alt="email-sending-flow" width="500" />
-</div>
+
+
+![email-sending-flow](/images/chapters/23-distributed-email-service/email-sending-flow.png)
+
+
 
 - User writes an email and presses "send". Email is sent to load balancer.
 - Load balancer rate limits excessive mail sends and routes to one of the web servers.
@@ -152,9 +162,11 @@ We need to also monitor size of outgoing message queue. Growing too large might 
 
 Here's the email receiving flow:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/23-distributed-email-service/email-receiving-flkow.png" alt="email-receiving-flow" width="500" />
-</div>
+
+
+![email-receiving-flow](/images/chapters/23-distributed-email-service/email-receiving-flkow.png)
+
+
 
 - Incoming emails arrive at the SMTP load balancer. Mails are distributed to SMTP servers, where mail acceptance policy is done (eg invalid emails are directly discarded).
 - If attachment of email is too large, we can put it in object store (s3).
@@ -200,38 +212,48 @@ Let's define the tables:
 
 Legend for tables to follow:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/23-distributed-email-service/legend.png" alt="legend" width="500" />
-</div>
+
+
+![legend](/images/chapters/23-distributed-email-service/legend.png)
+
+
 
 Here is the folders table:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/23-distributed-email-service/folders-table.png" alt="folders-table" width="500" />
-</div>
+
+
+![folders-table](/images/chapters/23-distributed-email-service/folders-table.png)
+
+
 
 emails table:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/23-distributed-email-service/emails-table.png" alt="emails-table" width="500" />
-</div>
+
+
+![emails-table](/images/chapters/23-distributed-email-service/emails-table.png)
+
+
 
 - email_id is timeuuid which allows sorting based on timestamp when email was created
 
 Attachments are stored in a separate table, identified by filename:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/23-distributed-email-service/attachments.png" alt="attachments" width="500" />
-</div>
+
+
+![attachments](/images/chapters/23-distributed-email-service/attachments.png)
+
+
 
 Supporting fetchin read/unread emails is easy in a traditional relational database, but not in Cassandra, since filtering on non-partition/clustering key is prohibited.
 One workaround to fetch all emails in a folder and filter in-memory, but that doesn't work well for a big-enough application.
 
 What we can do is denormalize the emails table into read/unread emails tables:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/23-distributed-email-service/read-unread-emails.png" alt="read-unread-emails" width="500" />
-</div>
+
+
+![read-unread-emails](/images/chapters/23-distributed-email-service/read-unread-emails.png)
+
+
 
 In order to support conversation threads, we can include some headers, which mail clients interpret and use to reconstruct a conversation thread:
 
@@ -280,9 +302,11 @@ Let's compare google search with email search:
 
 To achieve this search functionality, one option is to use an Elasticsearch cluster. We can use `user_id` as the partition key to group data under the same node:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/23-distributed-email-service/elasticsearch.png" alt="elasticsearch" width="500" />
-</div>
+
+
+![elasticsearch](/images/chapters/23-distributed-email-service/elasticsearch.png)
+
+
 
 Mutating operations are async via Kafka in order to decouple services from the reindexing flow.
 Actually searching for data happens synchronously.
@@ -298,9 +322,11 @@ This technique is used in Cassandra, BigTable and RocksDB.
 
 Its core idea is to store data in-memory until a predefined threshold is reached, after which it is merged in the next layer (disk):
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/23-distributed-email-service/lsm-tree.png" alt="lsm-tree" width="500" />
-</div>
+
+
+![lsm-tree](/images/chapters/23-distributed-email-service/lsm-tree.png)
+
+
 
 Main trade-offs between the two approaches:
 - Elasticsearch scales to some extent, whereas a custom search engine can be fine-tuned for the email use-case, allowing it to scale further.
@@ -313,9 +339,11 @@ Since individual user operations don't collide with other users, most components
 
 To ensure high availability, we can also use a multi-DC setup with leader-folower failover in case of failures:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/23-distributed-email-service/multi-dc-example.png" alt="multi-dc-example" width="500" />
-</div>
+
+
+![multi-dc-example](/images/chapters/23-distributed-email-service/multi-dc-example.png)
+
+
 
 ---
 

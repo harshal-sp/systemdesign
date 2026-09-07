@@ -60,9 +60,11 @@ At a high-level we'd want to establish effective message passing between peers. 
 
 A more practical approach is to use a shared backend as a fan-out mechanism towards friends you want to reach:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/17-nearby-friends/fan-out-backend.png" alt="fan-out-backend" width="500" />
-</div>
+
+
+![fan-out-backend](/images/chapters/17-nearby-friends/fan-out-backend.png)
+
+
 
 What does the backend do?
  * Receives location updates from all active users
@@ -73,9 +75,11 @@ This sounds simple but the challenge is to design the system for the scale we're
 
 We'll start with a simpler design at first and discuss a more advanced approach in the deep dive:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/17-nearby-friends/simple-high-level-design.png" alt="simple-high-level-design" width="500" />
-</div>
+
+
+![simple-high-level-design](/images/chapters/17-nearby-friends/simple-high-level-design.png)
+
+
 
 - **Load balancer**: spreads traffic across rest API servers as well as bidirectional web socket servers
 - **Rest API servers**: handles auxiliary tasks such as managing friends, updating profiles, etc
@@ -85,9 +89,11 @@ We'll start with a simpler design at first and discuss a more advanced approach 
 - **Location history database**: stores a history of user location data, not necessarily used directly within nearby friends feature, but instead used to track historical data for analytical purposes
 - **Redis pubsub**: used as a lightweight message bus which enables different topics for each user channel for location updates.
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/17-nearby-friends/redis-pubsub-usage.png" alt="redis-pubsub-usage" width="500" />
-</div>
+
+
+![redis-pubsub-usage](/images/chapters/17-nearby-friends/redis-pubsub-usage.png)
+
+
 
 In the above example, websocket servers subscribe to channels for the users which are connected to them & forward location updates whenever they receive them to appropriate users.
 
@@ -95,9 +101,11 @@ In the above example, websocket servers subscribe to channels for the users whic
 
 Here's how the periodic location update flow works:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/17-nearby-friends/periodic-location-update.png" alt="periodic-location-update" width="500" />
-</div>
+
+
+![periodic-location-update](/images/chapters/17-nearby-friends/periodic-location-update.png)
+
+
 
  * Mobile client sends a location update to the load balancer
  * Load balancer forwards location update to the websocket server's persistent connection for that client
@@ -109,9 +117,11 @@ Here's how the periodic location update flow works:
 
 Here's a more detailed version of the same flow:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/17-nearby-friends/detailed-periodic-location-update.png" alt="detailed-periodic-location-update" width="500" />
-</div>
+
+
+![detailed-periodic-location-update](/images/chapters/17-nearby-friends/detailed-periodic-location-update.png)
+
+
 
 On average, there's going to be 40 location updates to forward as a user has 400 friends on average and 10% of them are online at a time.
 
@@ -158,9 +168,11 @@ In order to support a distributed redis cluster, we'll need to utilize a service
 
 What we need to encode in the service discovery component is this data:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/17-nearby-friends/channel-distribution-data.png" alt="channel-distribution-data" width="500" />
-</div>
+
+
+![channel-distribution-data](/images/chapters/17-nearby-friends/channel-distribution-data.png)
+
+
 
 Web socket servers use that encoded data, fetched from zookeeper to determine where a particular channel lives. For efficiency, the hash ring data can be cached in-memory on each websocket server.
 
@@ -173,9 +185,11 @@ We have to be mindful of some potential issues during scaling operations:
  * Some location updates might be missed from clients during the operation, which is acceptable for this problem, but we should still minimize it from happening. Consider doing such operation when traffic is at lowest point of the day.
  * We can leverage consistent hashing to minimize amount of channels moved in the event of adding/removing servers
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/17-nearby-friends/consistent-hashing.png" alt="consistent-hashing" width="500" />
-</div>
+
+
+![consistent-hashing](/images/chapters/17-nearby-friends/consistent-hashing.png)
+
+
 
 ### **Adding/removing friends**
 
@@ -195,21 +209,27 @@ What if the interviewer wants to update the design to include a feature where we
 
 One way to handle this is to define a pool of pubsub channels, based on geohash:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/17-nearby-friends/geohash-pubsub.png" alt="geohash-pubsub" width="500" />
-</div>
+
+
+![geohash-pubsub](/images/chapters/17-nearby-friends/geohash-pubsub.png)
+
+
 
 Anyone within the geohash subscribes to the appropriate channel to receive location updates for random users:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/17-nearby-friends/location-updates-geohash.png" alt="location-updates-geohash" width="500" />
-</div>
+
+
+![location-updates-geohash](/images/chapters/17-nearby-friends/location-updates-geohash.png)
+
+
 
 We could also subscribe to several geohashes to handle cases where someone is close but in a bordering geohash:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/17-nearby-friends/geohash-borders.png" alt="geohash-borders" width="500" />
-</div>
+
+
+![geohash-borders](/images/chapters/17-nearby-friends/geohash-borders.png)
+
+
 
 ### **Alternative to Redis pub/sub**
 

@@ -60,9 +60,11 @@ GET /v1/search/nearby
 ### **High-Level System Architecture**
 The system comprises of two parts: Location based service (LBS) and business related service.
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/16-proximity-service/high-level-design.png" alt="HLD" width="400" />
-</div>
+
+
+![HLD](/images/chapters/16-proximity-service/high-level-design.png)
+
+
 
 - **Location-Based Service (LBS)**: 
   - Processes location-based search queries.
@@ -84,9 +86,11 @@ The system comprises of two parts: Location based service (LBS) and business rel
 
 ### **Option 1: Two-Dimensional Search (Naive Approach)**
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/16-proximity-service/2d-search.png" alt="2D" width="250" />
-</div>
+
+
+![2D](/images/chapters/16-proximity-service/2d-search.png)
+
+
 
 The most intuitive way is to draw a circle with pre-defined radius and find all the businesses within the circle.
 
@@ -109,16 +113,20 @@ A potiential improvement is to build index on logitude and latitude columns, alh
   - Hash: Even grid, Geo Hash
   - Tree: Quadtree, Google S2, RTree
 
-  <div style="margin-left:3rem">
-    <img src="/images/chapters/16-proximity-service/geospatial-index-types.png" alt="2D" width="500" />
-  </div>
+  
+
+![2D](/images/chapters/16-proximity-service/geospatial-index-types.png)
+
+
 
 
 ### **Option 2: Evenly Divided Grid**
 
-  <div style="margin-left:3rem">
-    <img src="/images/chapters/16-proximity-service/even-grid.png" alt="Even Grid" width="400" />
-  </div>
+  
+
+![Even Grid](/images/chapters/16-proximity-service/even-grid.png)
+
+
 
 - **Divides the world into fixed-size grids**.
 - **Issue**: Uneven business distribution (high density in cities, sparse in rural areas).
@@ -129,23 +137,35 @@ A potiential improvement is to build index on logitude and latitude columns, alh
 - Repeat this subdivision
 
   <div style="margin-left:3rem">
-    <img src="/images/chapters/16-proximity-service/geohash.png" alt="Geohash" width="300" />
-    <img src="/images/chapters/16-proximity-service/geohash-1.png" alt="Geohash" width="285" />
+    
+
+![Geohash](/images/chapters/16-proximity-service/geohash.png)
+
+
+    
+
+![Geohash](/images/chapters/16-proximity-service/geohash-1.png)
+
+
   </div>
 
 
 - **Encodes latitude and longitude into a single alphanumeric string**. It has 12 precisions (levels)
 - **Hierarchical grid structure** allows for efficient searching.
 - The right precision is chosen by using the minimal geohash length according to the table.
-  <div style="margin-left:3rem">
-    <img src="/images/chapters/16-proximity-service/geohash-radius-mapping.png" alt="Geohash Radius" width="400" />
-  </div>
+  
+
+![Geohash Radius](/images/chapters/16-proximity-service/geohash-radius-mapping.png)
+
+
 - Geohash guarantees that the longer a shared prefix is between two geohashes, the closer they are.
 
 - **Challenges**:
-  <div style="margin-left:3rem">
-    <img src="/images/chapters/16-proximity-service/boundary-issue.png" alt="Boundary Issue" width="300" />
-  </div>
+  
+
+![Boundary Issue](/images/chapters/16-proximity-service/boundary-issue.png)
+
+
 
   - **Boundary issues** (businesses close to grid edges may get excluded).
     - Two locations can be very close but have no shared prefix at all (can be on other side of equator)
@@ -158,23 +178,29 @@ A potiential improvement is to build index on logitude and latitude columns, alh
   A quadtree is a tree data structure that recursively divides a two-dimensional space into four quadrants, with each internal node having exactly four children, representing the four sub-regions of the space.
   - The quadtree is an in-memory data structure and it runs on each LBS server and built on server startup time.
 
-  <div style="margin-left:3rem">
-    <img src="/images/chapters/16-proximity-service/quadtree.png" alt="Quadtree" width="500" />
-  </div>
+  
+
+![Quadtree](/images/chapters/16-proximity-service/quadtree.png)
+
+
 
   - The root node is recursively broken down into 4 quadrants until no nodes are left with more than x number of businesses (100 in this case).
 
-  <div style="margin-left:3rem">
-    <img src="/images/chapters/16-proximity-service/building-quadtree.png" alt="Building Quadtree" width="500" />
-  </div>
+  
+
+![Building Quadtree](/images/chapters/16-proximity-service/building-quadtree.png)
+
+
 
 - The quadtree index doen't take too much memory (typically in GBs) and can easily fit in one server.
 - Since tge time complexity to build the tree is nlogn, it might take a few minutes to build the tree.
 - **Efficient for k-nearest search queries** (e.g., find the closest gas station).
 
-  <div style="margin-left:3rem">
-    <img src="/images/chapters/16-proximity-service/realworld-quadtree.png" alt="Real World Quadtree" width="400" />
-  </div>
+  
+
+![Real World Quadtree](/images/chapters/16-proximity-service/realworld-quadtree.png)
+
+
 
 #### Operational considerations
  - For around 200 million businesses, it might take few minutes to build a quadtree at the server start time.
@@ -187,8 +213,16 @@ It maps a sphere to a !D index based on Hilbert curve.Two points that are close 
 
 
   <div style="margin-left:3rem">
-    <img src="/images/chapters/16-proximity-service/hilbert-curve.png" alt="Hilbert curve" width="300" />
-    <img src="/images/chapters/16-proximity-service/geofence.png" alt="Geofence" width="355" />
+    
+
+![Hilbert curve](/images/chapters/16-proximity-service/hilbert-curve.png)
+
+
+    
+
+![Geofence](/images/chapters/16-proximity-service/geofence.png)
+
+
   </div>
 
 - **Divides the earth into small cells using a Hilbert curve**.
@@ -257,9 +291,11 @@ The most obvious cache key choice is the location coordinate, however it has a f
 ### **Final System Architecture**
 
 
-  <div style="margin-left:3rem">
-    <img src="/images/chapters/16-proximity-service/final-design.png" alt="Final Design" width="500" />
-  </div>
+  
+
+![Final Design](/images/chapters/16-proximity-service/final-design.png)
+
+
 
 
 This final algorithm looks like this:

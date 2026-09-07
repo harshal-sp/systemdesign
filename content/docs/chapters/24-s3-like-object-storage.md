@@ -23,9 +23,11 @@ It targets "cold" data and is mainly used for archival and backup.
 There is no hierarchical directory structure, all data is stored as objects in a flat structure.
 It is relatively slow compared to other storage types. Most cloud providers have an object storage offering - Amazon S3, Google GCS, etc.
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/24-s3-like-object-storage/storage-comparison.png" alt="storage-comparison" width="500" />
-</div>
+
+
+![storage-comparison](/images/chapters/24-s3-like-object-storage/storage-comparison.png)
+
+
 
 |                 | Block Storage                    | File Storage                            | Object Storage                 |
 |-----------------|----------------------------------|-----------------------------------------|--------------------------------|
@@ -99,21 +101,27 @@ When accessing a file, we first fetch its metadata from the inode, prior to fetc
 
 Object storage works similarly - metadata store is used for file information, but contents are stored on disk:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/24-s3-like-object-storage/object-store-vs-unix.png" alt="object-store-vs-unix" width="500" />
-</div>
+
+
+![object-store-vs-unix](/images/chapters/24-s3-like-object-storage/object-store-vs-unix.png)
+
+
 
 By separating metadata from file contents, we can scale the different stores independently:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/24-s3-like-object-storage/bucket-and-object.png" alt="bucket-and-object" width="500" />
-</div>
+
+
+![bucket-and-object](/images/chapters/24-s3-like-object-storage/bucket-and-object.png)
+
+
 
 ### **High-level design**
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/24-s3-like-object-storage/high-level-design.png" alt="high-level-design" width="500" />
-</div>
+
+
+![high-level-design](/images/chapters/24-s3-like-object-storage/high-level-design.png)
+
+
 
 - **Load balancer** - distributes API requests across service replicas
 - **API service** - Stateless server, orchestrating calls to metadata and object store, as well as IAM service.
@@ -123,9 +131,11 @@ By separating metadata from file contents, we can scale the different stores ind
 
 ### **Uploading an object**
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/24-s3-like-object-storage/uploading-object.png" alt="uploading-object" width="500" />
-</div>
+
+
+![uploading-object](/images/chapters/24-s3-like-object-storage/uploading-object.png)
+
+
 
 - Create a bucket named "bucket-to-share" via HTTP PUT request
 - API service calls IAM to ensure user is authorized and has write permissions
@@ -162,9 +172,11 @@ Date: Sun, 12 Sept 2021 18:30:01 GMT
 Authorization: authorization string
 ```
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/24-s3-like-object-storage/download-object.png" alt="download-object" width="500" />
-</div>
+
+
+![download-object](/images/chapters/24-s3-like-object-storage/download-object.png)
+
+
 
 - Client sends an HTTP GET request to the load balancer, ie `GET /bucket-to-share/script.txt`
 - API service queries IAM to verify the user has correct permissions to read the bucket
@@ -181,15 +193,19 @@ Authorization: authorization string
 
 Here's how the API service interacts with the data store:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/24-s3-like-object-storage/data-store-interactions.png" alt="data-store-interactions" width="500" />
-</div>
+
+
+![data-store-interactions](/images/chapters/24-s3-like-object-storage/data-store-interactions.png)
+
+
 
 The data store's main components:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/24-s3-like-object-storage/data-store-main-components.png" alt="data-store-main-components" width="500" />
-</div>
+
+
+![data-store-main-components](/images/chapters/24-s3-like-object-storage/data-store-main-components.png)
+
+
 
 The data routing service provides a RESTful or gRPC API to access the data node cluster.
 It is a stateless service, which scales by adding more servers.
@@ -202,9 +218,11 @@ It's main responsibilities are:
 The placement service determines which data nodes should store an object.
 It maintains a virtual cluster map, which determines the physical topology of a cluster.
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/24-s3-like-object-storage/virtual-cluster-map.png" alt="virtual-cluster-map" width="500" />
-</div>
+
+
+![virtual-cluster-map](/images/chapters/24-s3-like-object-storage/virtual-cluster-map.png)
+
+
 
 The service also sends heartbeats to all data nodes to determine if they should be removed from the virtual cluster.
 
@@ -222,9 +240,11 @@ The heartbeat includes:
 
 #### Data persistence flow
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/24-s3-like-object-storage/data-persistence-flow.png" alt="data-persistence-flow" width="500" />
-</div>
+
+
+![data-persistence-flow](/images/chapters/24-s3-like-object-storage/data-persistence-flow.png)
+
+
 
 - API service forwards the object data to data store
 - Data routing service sends the data to the primary data node
@@ -235,9 +255,11 @@ Caveats:
 - Given an object UUID, it's replication group is deterministically chosen by using consistent hashing
 - In step 4, the primary data node replicates the object data before returning a response. This favors strong consistency over higher latency.
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/24-s3-like-object-storage/consistency-vs-latency.png" alt="consistency-vs-latency" width="500" />
-</div>
+
+
+![consistency-vs-latency](/images/chapters/24-s3-like-object-storage/consistency-vs-latency.png)
+
+
 
 #### How data is organized
 
@@ -249,9 +271,11 @@ This works, but is not performant with many small files in a file system:
 
 These issues can be addressed by merging many small files into bigger ones via a write-ahead log (WAL). Once the file reaches its capacity (typically a few GB), a new file is created:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/24-s3-like-object-storage/wal-optimization.png" alt="wal-optimization" width="500" />
-</div>
+
+
+![wal-optimization](/images/chapters/24-s3-like-object-storage/wal-optimization.png)
+
+
 
 The downside of this approach is that write access to the file needs to be serialized. Multiple cores accessing the same file must wait for each other.
 To fix this, we can confine files to specific cores to avoid lock contention.
@@ -281,9 +305,11 @@ SQLite is a good option as it's a lightweight file-based relational database.
 
 #### Updated data persistence flow
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/24-s3-like-object-storage/updated-data-persistence-flow.png" alt="updated-data-persistence-flow" width="500" />
-</div>
+
+
+![updated-data-persistence-flow](/images/chapters/24-s3-like-object-storage/updated-data-persistence-flow.png)
+
+
 
 - API Service sends a request to save a new object
 - Data node service appends the new object at the end of a file, named "/data/c"
@@ -297,9 +323,11 @@ First problem to address is hardware failures. We can achieve that by replicatin
 But in addition to that, we also ought to replicate across different failure domains (cross-rack, cross-dc, separate networks, etc).
 A critical event can cause multiple hardware failures within the same domain:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/24-s3-like-object-storage/failure-domain-isolation.png" alt="failure-domain-isolation" width="500" />
-</div>
+
+
+![failure-domain-isolation](/images/chapters/24-s3-like-object-storage/failure-domain-isolation.png)
+
+
 
 Assuming annual failure rate of a typical HDD is 0.81%, making three copies gives us 6 nines of durability.
 
@@ -307,23 +335,29 @@ Replicating the data nodes like that grants us the durability we want, but we co
 
 Erasure coding enables us to use parity bits, which allow us to reconstruct lost bits in the event of a failure:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/24-s3-like-object-storage/erasure-coding.png" alt="erasure-coding" width="500" />
-</div>
+
+
+![erasure-coding](/images/chapters/24-s3-like-object-storage/erasure-coding.png)
+
+
 
 Imagine those bits are data nodes. If two of them go down, they can be recovered using the remaining four ones.
 
 There are different erasure coding schemes. In our case, we could use 8+4 erasure coding, split across different failure domains to maximize reliability:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/24-s3-like-object-storage/erasure-coding-across-failure-domains.png" alt="erasure-coding-across-failure-domains" width="500" />
-</div>
+
+
+![erasure-coding-across-failure-domains](/images/chapters/24-s3-like-object-storage/erasure-coding-across-failure-domains.png)
+
+
 
 Erasure coding enables us to achieve a much lower storage cost (50% improvement) at the expense of access speed due to the data routing service having to collect data from multiple locations:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/24-s3-like-object-storage/erasure-coding-vs-replication.png" alt="erasure-coding-vs-replication" width="500" />
-</div>
+
+
+![erasure-coding-vs-replication](/images/chapters/24-s3-like-object-storage/erasure-coding-vs-replication.png)
+
+
 
 Other caveats:
 - Replication requires 200% storage overhead (in case of 3 replicas) vs. 50% via erasure coding
@@ -341,9 +375,11 @@ To detect this, we can use checksums - a hash of the file contents, which can be
 
 In our case, we'll store checksums for each file and each object:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/24-s3-like-object-storage/checksums-for-correctness.png" alt="checksums-for-correctness" width="500" />
-</div>
+
+
+![checksums-for-correctness](/images/chapters/24-s3-like-object-storage/checksums-for-correctness.png)
+
+
 
 In the case of erasure coding (8+4), we'll need to fetch each of the 8 pieces of data separately and verify each of their checksums.
 
@@ -353,9 +389,11 @@ In the case of erasure coding (8+4), we'll need to fetch each of the 8 pieces of
 
 Table schemas:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/24-s3-like-object-storage/metadata-data-model.png" alt="metadata-data-model" width="500" />
-</div>
+
+
+![metadata-data-model](/images/chapters/24-s3-like-object-storage/metadata-data-model.png)
+
+
 
 Queries we need to support:
 - Find an object ID by name
@@ -393,23 +431,29 @@ Versioning works by having another `object_version` column which is of type TIME
 
 Each new version produces a new `object_id`:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/24-s3-like-object-storage/object-versioning.png" alt="object-versioning" width="500" />
-</div>
+
+
+![object-versioning](/images/chapters/24-s3-like-object-storage/object-versioning.png)
+
+
 
 Deleting an object creates a new version with a special `object_id` indicating that the object was deleted. Queries for it return 404:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/24-s3-like-object-storage/deleting-versioned-object.png" alt="deleting-versioned-object" width="500" />
-</div>
+
+
+![deleting-versioned-object](/images/chapters/24-s3-like-object-storage/deleting-versioned-object.png)
+
+
 
 ### **Optimizing uploads of large files**
 
 Uploading large files can be optimized by using multipart uploads - splitting a big file into several chunks, uploaded independently:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/24-s3-like-object-storage/multipart-upload.png" alt="multipart-upload" width="500" />
-</div>
+
+
+![multipart-upload](/images/chapters/24-s3-like-object-storage/multipart-upload.png)
+
+
 
 - Client calls service to initiate a multipart upload
 - Data store returns an upload ID which uniquely identifies the upload
@@ -435,9 +479,11 @@ To facilitate the deletion, we'll use a process called compaction:
 - `object_mapping` table is updated once copying is complete using a database transaction
 - To avoid making too many small files, compaction is done on files which grow beyond a certain threshold
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/24-s3-like-object-storage/compaction.png" alt="compaction" width="500" />
-</div>
+
+
+![compaction](/images/chapters/24-s3-like-object-storage/compaction.png)
+
+
 
 ---
 

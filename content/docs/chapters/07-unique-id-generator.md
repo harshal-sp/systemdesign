@@ -25,7 +25,11 @@ This chapter addresses the challenge of designing a **unique ID generator** for 
 - **Approach:** Use database `auto_increment` with step increments (e.g., `+k` for k servers).
 
     <p align="left">
-    <img src="/images/chapters/07-unique-id-generator/multi-master.png"  alt="Multi Master" width="400">
+    
+
+![Multi Master](/images/chapters/07-unique-id-generator/multi-master.png)
+
+
     </p>
 
 - **Drawbacks:**
@@ -39,7 +43,11 @@ This chapter addresses the challenge of designing a **unique ID generator** for 
     - UUIDs can be generated independently without coordination between servers
 
         <p align="left">
-        <img src="/images/chapters/07-unique-id-generator/uuid.png"  alt="UUID generator" width="600">
+        
+
+![UUID generator](/images/chapters/07-unique-id-generator/uuid.png)
+
+
         </p>
 
 - **Advantages:**
@@ -54,7 +62,11 @@ This chapter addresses the challenge of designing a **unique ID generator** for 
 - **Approach:** Use a centralized database server to increment and assign IDs.
 
     <p align="left">
-    <img src="/images/chapters/07-unique-id-generator/ticket-server.png"  alt="UUID generator" width="500">
+    
+
+![UUID generator](/images/chapters/07-unique-id-generator/ticket-server.png)
+
+
     </p>
 
 - **Advantages:**
@@ -67,12 +79,16 @@ This chapter addresses the challenge of designing a **unique ID generator** for 
 ### 4. Twitter Snowflake Approach
 - **Approach:** 
 
-    <div style="margin-left:3rem">
-      <img src="/images/chapters/07-unique-id-generator/twitter-snowflake.png"  alt="Snowflake approach" width="500">
-    </div>
-    <div style="margin-left:3rem">
-      <img src="/images/chapters/07-unique-id-generator/snowflake-id-breakdown.png"  alt="Snowflake ID breakdow" width="500">
-    </div>
+    
+
+![Snowflake approach](/images/chapters/07-unique-id-generator/twitter-snowflake.png)
+
+
+    
+
+![Snowflake ID breakdow](/images/chapters/07-unique-id-generator/snowflake-id-breakdown.png)
+
+
 
     - Divide IDs into sections to ensure uniqueness and scalability.
     - **Sign Bit (1 bit):** Always `0`, potentially distinguishing signed and unsigned numbers.

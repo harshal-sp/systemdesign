@@ -15,7 +15,11 @@ This chapter covers key concepts, methodologies, and examples to build proficien
 ### Power of Two
 Understanding data volume in terms of powers of two is fundamental:
 
-<img src="/images/chapters/02-back-of-the-envelope-estimation/power-of-two.png" alt="power-of-two" width="500" />
+
+
+![power-of-two](/images/chapters/02-back-of-the-envelope-estimation/power-of-two.png)
+
+
 
 This knowledge helps in performing accurate storage and bandwidth calculations.
 

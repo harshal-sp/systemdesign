@@ -67,9 +67,11 @@ Traditional message queues typically don't support data retention and don't prov
 
 Key components of a message queue:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/19-distributed-message-queue/message-queue-components.png" alt="message-queue-components" width="500" />
-</div>
+
+
+![message-queue-components](/images/chapters/19-distributed-message-queue/message-queue-components.png)
+
+
 
  * Producer sends messages to a queue
  * Consumer subscribes to a queue and consumes the subscribed messages
@@ -80,9 +82,11 @@ Key components of a message queue:
 
 The first type of messaging model is point-to-point and it's commonly found in traditional message queues:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/19-distributed-message-queue/point-to-point-model.png" alt="point-to-point-model" width="500" />
-</div>
+
+
+![point-to-point-model](/images/chapters/19-distributed-message-queue/point-to-point-model.png)
+
+
 
  * A message is sent to a queue and it's consumed by exactly one consumer.
  * There can be multiple consumers, but a message is consumed only once.
@@ -91,9 +95,11 @@ The first type of messaging model is point-to-point and it's commonly found in t
 
 On the other hand, the publish-subscribe model is more common for event streaming platforms:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/19-distributed-message-queue/publish-subscribe-model.png" alt="publish-subscribe-model" width="500" />
-</div>
+
+
+![publish-subscribe-model](/images/chapters/19-distributed-message-queue/publish-subscribe-model.png)
+
+
 
  * In this model, messages are associated to a topic.
  * Consumers are subscribed to a topic and they receive all messages sent to this topic.
@@ -102,9 +108,11 @@ On the other hand, the publish-subscribe model is more common for event streamin
 
 What if the data volume for a topic is too large? One way to scale is by splitting a topic into partitions (aka sharding):
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/19-distributed-message-queue/partitions.png" alt="partitions" width="500" />
-</div>
+
+
+![partitions](/images/chapters/19-distributed-message-queue/partitions.png)
+
+
 
  * Messages sent to a topic are evenly distributed across partitions
  * The servers that host partitions are called brokers
@@ -118,9 +126,11 @@ What if the data volume for a topic is too large? One way to scale is by splitti
 
 Consumer groups are a set of consumers working together to consume messages from a topic:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/19-distributed-message-queue/consumer-groups.png" alt="consumer-groups" width="500" />
-</div>
+
+
+![consumer-groups](/images/chapters/19-distributed-message-queue/consumer-groups.png)
+
+
 
  * Messages are replicated per consumer group (not per consumer).
  * Each consumer group maintains its own offset.
@@ -130,9 +140,11 @@ Consumer groups are a set of consumers working together to consume messages from
 
 ### **High-level architecture**
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/19-distributed-message-queue/high-level-architecture.png" alt="high-level-architecture" width="500" />
-</div>
+
+
+![high-level-architecture](/images/chapters/19-distributed-message-queue/high-level-architecture.png)
+
+
 
 - **Clients**: producer and consumer. Producer pushes messages to a designated topic. Consumer group subscribes to messages from a topic.
 - **Brokers**: hold multiple partitions. A partition holds a subset of messages for a topic.
@@ -163,9 +175,11 @@ What are our options:
   * We split partitions into segments to avoid maintaining a very large file.
   * Old segments are read-only. Writes are accepted by latest segment only.
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/19-distributed-message-queue/wal-example.png" alt="wal-example" width="500" />
-</div>
+
+
+![wal-example](/images/chapters/19-distributed-message-queue/wal-example.png)
+
+
 
 WAL files are extremely efficient when used with traditional HDDs. 
 
@@ -179,9 +193,11 @@ It is important that the message schema is compliant between producer, queue and
 
 Example message structure:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/19-distributed-message-queue/message-structure.png" alt="message-structure" width="500" />
-</div>
+
+
+![message-structure](/images/chapters/19-distributed-message-queue/message-structure.png)
+
+
 
 The key of the message specifies which partition a message belongs to. An example mapping is `hash(key) % numPartitions`.
 For more flexibility, the producer can override default keys in order to control which partitions messages are distributed to.
@@ -222,9 +238,11 @@ If a producer wants to send a message to a partition, which broker should it con
 
 One option is to introduce a routing layer, which route messages to the correct broker. If replication is enabled, the correct broker is the leader replica:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/19-distributed-message-queue/routing-layer.png" alt="routing-layer" width="500" />
-</div>
+
+
+![routing-layer](/images/chapters/19-distributed-message-queue/routing-layer.png)
+
+
 
  * Routing layer reads the replication plan from the metadata store and caches it locally.
  * Producer sends a message to the routing layer.
@@ -239,9 +257,11 @@ This approach works but has some drawbacks:
 
 To mitigate these issues, we can embed the routing layer into the producer:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/19-distributed-message-queue/routing-layer-producer.png" alt="routing-layer-producer" width="500" />
-</div>
+
+
+![routing-layer-producer](/images/chapters/19-distributed-message-queue/routing-layer-producer.png)
+
+
 
  * Fewer network hops lead to lower latency
  * Producers can control which partition a message is routed to
@@ -249,9 +269,11 @@ To mitigate these issues, we can embed the routing layer into the producer:
 
 The batch size choice is a classical trade-off between throughput and latency. 
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/19-distributed-message-queue/batch-size-throughput-vs-latency.png" alt="batch-size-throughput-vs-latency" width="500" />
-</div>
+
+
+![batch-size-throughput-vs-latency](/images/chapters/19-distributed-message-queue/batch-size-throughput-vs-latency.png)
+
+
 
  * Larger batch size leads to longer wait time before batch is committed. 
  * Smaller batch size leads to request being sent sooner and having lower latency but lower throughput.
@@ -260,9 +282,11 @@ The batch size choice is a classical trade-off between throughput and latency.
 
 The consumer specifies its offset in a partition and receives a chunk of messages, beginning from that offset:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/19-distributed-message-queue/consumer-example.png" alt="consumer-example" width="500" />
-</div>
+
+
+![consumer-example](/images/chapters/19-distributed-message-queue/consumer-example.png)
+
+
 
 One important consideration when designing the consumer is whether to use a push or a pull model:
 - **Push model**: leads to lower latency as broker pushes messages to consumer as it receives them.
@@ -276,9 +300,11 @@ One important consideration when designing the consumer is whether to use a push
 
 Hence, most message queues (and us) choose the pull model.
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/19-distributed-message-queue/consumer-flow.png" alt="consumer-flow" width="500" />
-</div>
+
+
+![consumer-flow](/images/chapters/19-distributed-message-queue/consumer-flow.png)
+
+
 
  * A new consumer subscribes to topic A and joins group 1.
  * The correct broker node is found by hashing the group name. This way, all consumers in a group connect to the same broker.
@@ -296,9 +322,11 @@ This process occurs when a consumer joins/leaves or a partition is added/removed
 
 The broker, acting as a coordinator plays a huge role in orchestrating the rebalancing workflow.
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/19-distributed-message-queue/consumer-rebalancing.png" alt="consumer-rebalancing" width="500" />
-</div>
+
+
+![consumer-rebalancing](/images/chapters/19-distributed-message-queue/consumer-rebalancing.png)
+
+
 
  * All consumers from the same group are connected to the same coordinator. The coordinator is found by hashing the group name.
  * When the consumer list changes, the coordinator chooses a new leader of the group.
@@ -306,15 +334,19 @@ The broker, acting as a coordinator plays a huge role in orchestrating the rebal
 
 When the coordinator stops receiving heartbeats from the consumers in a group, a rebalancing is triggered:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/19-distributed-message-queue/consumer-rebalance-example.png" alt="consumer-rebalance-example" width="500" />
-</div>
+
+
+![consumer-rebalance-example](/images/chapters/19-distributed-message-queue/consumer-rebalance-example.png)
+
+
 
 Let's explore what happens when a consumer joins a group:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/19-distributed-message-queue/consumer-join-group-usecase.png" alt="consumer-join-group-usecase" width="500" />
-</div>
+
+
+![consumer-join-group-usecase](/images/chapters/19-distributed-message-queue/consumer-join-group-usecase.png)
+
+
 
  * Initially, only consumer A is in the group and it consumes all partitions.
  * Consumer B sends a request to join the group.
@@ -325,9 +357,11 @@ Let's explore what happens when a consumer joins a group:
 
 Here's what happens when a consumer leaves the group:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/19-distributed-message-queue/consumer-leaves-group-usecase.png" alt="consumer-leaves-group-usecase" width="500" />
-</div>
+
+
+![consumer-leaves-group-usecase](/images/chapters/19-distributed-message-queue/consumer-leaves-group-usecase.png)
+
+
 
  * Consumer A and B are in the same group
  * Consumer B asks to leave the group
@@ -336,17 +370,21 @@ Here's what happens when a consumer leaves the group:
 
 The process is similar when a consumer doesn't send a heartbeat for a long time:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/19-distributed-message-queue/consumer-no-heartbeat-usecase.png" alt="consumer-no-heartbeat-usecase" width="500" />
-</div>
+
+
+![consumer-no-heartbeat-usecase](/images/chapters/19-distributed-message-queue/consumer-no-heartbeat-usecase.png)
+
+
 
 ### **State storage**
 
 The state storage stores mapping between partitions and consumers, as well as the last consumed offsets for a partition.
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/19-distributed-message-queue/state-storage.png" alt="state-storage" width="500" />
-</div>
+
+
+![state-storage](/images/chapters/19-distributed-message-queue/state-storage.png)
+
+
 
 Group 1's offset is at 6, meaning all previous messages are consumed. If a consumer crashes, the new consumer will continue from that message on wards.
  
@@ -371,9 +409,11 @@ Zookeeper is essential for building distributed message queues.
 
 It is a hierarchical key-value store, commonly used for a distributed configuration, synchronization service and naming registry (ie service discovery).
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/19-distributed-message-queue/zookeeper.png" alt="zookeeper" width="500" />
-</div>
+
+
+![zookeeper](/images/chapters/19-distributed-message-queue/zookeeper.png)
+
+
 
 With this change, the broker only needs to maintain data for the messages. Metadata and state storage is in Zookeeper.
 
@@ -383,9 +423,11 @@ Zookeeper also helps with leader election of the broker replicas.
 
 In distributed systems, hardware issues are inevitable. We can tackle this via replication to achieve high availability.
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/19-distributed-message-queue/replication-example.png" alt="replication-example" width="500" />
-</div>
+
+
+![replication-example](/images/chapters/19-distributed-message-queue/replication-example.png)
+
+
 
  * Each partition is replicated across multiple brokers, but there is only one leader replica.
  * Producers send messages to leader replicas
@@ -402,9 +444,11 @@ In-sync replicas (ISR) are replicas for a partition that stay in-sync with the l
 
 The `replica.lag.max.messages` defines how many messages can a replica be lagging behind the leader to be considered in-sync.
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/19-distributed-message-queue/in-sync-replicas-example.png" alt="in-sync-replicas-example" width="500" />
-</div>
+
+
+![in-sync-replicas-example](/images/chapters/19-distributed-message-queue/in-sync-replicas-example.png)
+
+
 
  * Committed offset is 13
  * Two new messages are written to the leader, but not committed yet.
@@ -420,21 +464,27 @@ Acknowledgment handling is configurable.
 
 `ACK=all` means that all replicas in ISR have to sync a message. Message sending is slow, but message durability is highest.
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/19-distributed-message-queue/ack-all.png" alt="ack-all" width="500" />
-</div>
+
+
+![ack-all](/images/chapters/19-distributed-message-queue/ack-all.png)
+
+
 
 `ACK=1` means that producer receives acknowledgment once leader receives the message. Message sending is fast, but message durability is low.
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/19-distributed-message-queue/ack-1.png" alt="ack-1" width="500" />
-</div>
+
+
+![ack-1](/images/chapters/19-distributed-message-queue/ack-1.png)
+
+
 
 `ACK=0` means that producer sends messages without waiting for any acknowledgment from leader. Message sending is fastest, message durability is lowest.
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/19-distributed-message-queue/ack-0.png" alt="ack-0" width="500" />
-</div>
+
+
+![ack-0](/images/chapters/19-distributed-message-queue/ack-0.png)
+
+
 
 On the consumer side, we can connect all consumers to the leader for a partition and let them read messages from it:
  * This makes for the simplest design and easiest operation
@@ -465,9 +515,11 @@ Consumer groups are rebalancing help us achieve scalability and fault tolerance.
 
 How do brokers handle failure?
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/19-distributed-message-queue/broker-failure-recovery.png" alt="broker-failure-recovery" width="500" />
-</div>
+
+
+![broker-failure-recovery](/images/chapters/19-distributed-message-queue/broker-failure-recovery.png)
+
+
 
  * Once a broker fails, there are still enough replicas to avoid partition data loss
  * A new leader is elected and the broker coordinator redistributes partitions which were at the failed broker to existing replicas
@@ -480,9 +532,11 @@ Additional considerations to make the broker fault-tolerant:
 
 How do we handle redistribution of replicas when a new broker is added?
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/19-distributed-message-queue/broker-replica-redistribution.png" alt="broker-replica-redistribution" width="500" />
-</div>
+
+
+![broker-replica-redistribution](/images/chapters/19-distributed-message-queue/broker-replica-redistribution.png)
+
+
 
  * We can temporarily allow more replicas than configured, until new broker catches up
  * Once it does, we can remove the partition replica which is no longer needed
@@ -493,15 +547,19 @@ Whenever a new partition is added, the producer is notified and consumer rebalan
 
 In terms of data storage, we can only store new messages to the new partition vs. trying to copy all old ones:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/19-distributed-message-queue/partition-exmaple.png" alt="partition-example" width="500" />
-</div>
+
+
+![partition-example](/images/chapters/19-distributed-message-queue/partition-exmaple.png)
+
+
 
 Decreasing the number of partitions is more involved:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/19-distributed-message-queue/partition-decrease.png" alt="partition-decrease" width="500" />
-</div>
+
+
+![partition-decrease](/images/chapters/19-distributed-message-queue/partition-decrease.png)
+
+
 
  * Once a partition is decommissioned, new messages are only received by remaining partitions
  * The decommissioned partition isn't removed immediately as messages can still be consumed from it
@@ -517,9 +575,11 @@ Let's discuss different delivery semantics.
 
 With this guarantee, messages are delivered not more than once and could not be delivered at all.
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/19-distributed-message-queue/at-most-once.png" alt="at-most-once" width="500" />
-</div>
+
+
+![at-most-once](/images/chapters/19-distributed-message-queue/at-most-once.png)
+
+
 
  * Producer sends a message asynchronously to a topic. If message delivery fails, there is no retry.
  * Consumer fetches message and immediately commits offset. If consumer crashes before processing the message, the message will not be processed.
@@ -528,9 +588,11 @@ With this guarantee, messages are delivered not more than once and could not be 
 
 A message can be sent more than once and no message should be left unprocessed.
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/19-distributed-message-queue/at-least-once.png" alt="at-least-once" width="500" />
-</div>
+
+
+![at-least-once](/images/chapters/19-distributed-message-queue/at-least-once.png)
+
+
 
  * Producer sends message with `ack=1` or `ack=all`. If there is any issue, it will keep retrying.
  * Consumer fetches the message and consumes the offset only after it's done processing it.
@@ -541,9 +603,11 @@ A message can be sent more than once and no message should be left unprocessed.
 
 Extremely costly to implement for the system, albeit it's the friendliest guarantee to users:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/19-distributed-message-queue/exactly-once.png" alt="exactly-once" width="500" />
-</div>
+
+
+![exactly-once](/images/chapters/19-distributed-message-queue/exactly-once.png)
+
+
 
 ### **Advanced features**
 
@@ -563,9 +627,11 @@ We can resolve this using message filtering.
  * Filtering could also be done via the message payloads but that can be challenging and unsafe for encrypted/serialized messages
  * For more complex mathematical formulaes, the broker could implement a grammar parser or script executor, but that can be heavyweight for the message queue
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/19-distributed-message-queue/message-filtering.png" alt="message-filtering" width="500" />
-</div>
+
+
+![message-filtering](/images/chapters/19-distributed-message-queue/message-filtering.png)
+
+
 
 #### Delayed messages & scheduled messages
 
@@ -574,9 +640,11 @@ For example, we might submit a payment verification check for 30m from now, whic
 
 This can be achieved by sending messages to temporary storage in the broker and moving the message to the partition at the right time:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/19-distributed-message-queue/delayed-message-implementation.png" alt="delayed-message-implementation" width="500" />
-</div>
+
+
+![delayed-message-implementation](/images/chapters/19-distributed-message-queue/delayed-message-implementation.png)
+
+
 
  * The temporary storage can be one or more special message topics
  * The timing function can be achieved using dedicated delay queues or a [hierarchical time wheel](http://www.cs.columbia.edu/~nahum/w6998/papers/sosp87-timing-wheels.pdf)

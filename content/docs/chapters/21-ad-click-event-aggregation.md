@@ -10,9 +10,11 @@ Hence, tracking ad click events is important. In this chapter, we explore how to
 
 Digital advertising has a process called **real-time bidding (RTB)**, where digital advertising inventory is bought and sold:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/21-ad-click-event-aggregation/digital-advertising-example.png" alt="digital-advertising-example" width="500" />
-</div>
+
+
+![digital-advertising-example](/images/chapters/21-ad-click-event-aggregation/digital-advertising-example.png)
+
+
 
 Speed of RTB is important as it usually occurs within a second.
 Data accuracy is also very important as it impacts how much money advertisers pay.
@@ -170,18 +172,22 @@ Hence, we'll use the same data store (Cassandra) here as well.
 ### **High-level design**
 Here's how our system looks like:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/21-ad-click-event-aggregation/high-level-design-1.png" alt="high-level-design-1" width="500" />
-</div>
+
+
+![high-level-design-1](/images/chapters/21-ad-click-event-aggregation/high-level-design-1.png)
+
+
 
 Data flows as an unbounded data stream on both inputs and outputs.
 
 In order to avoid having a synchronous sink, where a consumer crashing can cause the whole system to stall, 
 we'll leverage asynchronous processing using message queues (Kafka) to decouple consumers and producers.
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/21-ad-click-event-aggregation/high-level-design-2.png" alt="high-level-design-2" width="500" />
-</div>
+
+
+![high-level-design-2](/images/chapters/21-ad-click-event-aggregation/high-level-design-2.png)
+
+
 
 The first message queue stores ad click event data:
 | ad_id | click_timestamp | user_id | ip | country |
@@ -197,19 +203,25 @@ As well as top N clicked ads aggregated per minute:
 
 The second message queue is there in order to achieve end to end exactly-once atomic commit semantics:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/21-ad-click-event-aggregation/atomic-commit.png" alt="atomic-commit" width="500" />
-</div>
+
+
+![atomic-commit](/images/chapters/21-ad-click-event-aggregation/atomic-commit.png)
+
+
 
 For the aggregation service, using the MapReduce framework is a good option:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/21-ad-click-event-aggregation/ad-count-map-reduce.png" alt="ad-count-map-reduce" width="500" />
-</div>
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/21-ad-click-event-aggregation/top-100-map-reduce.png" alt="top-100-map-reduce" width="500" />
-</div>
+
+![ad-count-map-reduce](/images/chapters/21-ad-click-event-aggregation/ad-count-map-reduce.png)
+
+
+
+
+
+![top-100-map-reduce](/images/chapters/21-ad-click-event-aggregation/top-100-map-reduce.png)
+
+
 
 Each node is responsible for one single task and it sends the processing result to the downstream node.
 
@@ -217,9 +229,11 @@ The map node is responsible for reading from the data source, then filtering and
 
 For example, the map node can allocate data across different aggregation nodes based on the `ad_id`:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/21-ad-click-event-aggregation/map-node.png" alt="map-node" width="500" />
-</div>
+
+
+![map-node](/images/chapters/21-ad-click-event-aggregation/map-node.png)
+
+
 
 Alternatively, we can distribute ads across Kafka partitions and let the aggregation nodes subscribe directly within a consumer group.
 However, the mapping node enables us to sanitize or transform the data before subsequent processing.
@@ -231,9 +245,11 @@ The aggregate node counts ad click events by `ad_id` in-memory every minute.
 
 The reduce node collects aggregated results from aggregate node and produces the final result:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/21-ad-click-event-aggregation/reduce-node.png" alt="reduce-node" width="500" />
-</div>
+
+
+![reduce-node](/images/chapters/21-ad-click-event-aggregation/reduce-node.png)
+
+
 
 This DAG model uses the MapReduce paradigm. It takes big data and leverages parallel distributed computing to turn it into regular-sized data.
 
@@ -243,17 +259,21 @@ Let's explore how this model can now help us to achieve our various use-cases.
 
 **Use-case 1 - aggregate the number of clicks**:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/21-ad-click-event-aggregation/use-case-1.png" alt="use-case-1" width="500" />
-</div>
+
+
+![use-case-1](/images/chapters/21-ad-click-event-aggregation/use-case-1.png)
+
+
 
  - Ads are partitioned using `ad_id % 3`
 
 **Use-case 2 - return top N most clicked ads**:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/21-ad-click-event-aggregation/use-case-2.png" alt="use-case-2" width="500" />
-</div>
+
+
+![use-case-2](/images/chapters/21-ad-click-event-aggregation/use-case-2.png)
+
+
 
  - In this case, we're aggregating the top 3 ads, but this can be extended to top N ads easily
  - Each node maintains a heap data structure for fast retrieval of top N ads
@@ -308,15 +328,19 @@ The key idea is to use a single stream processing engine.
 
 Lambda architecture:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/21-ad-click-event-aggregation/lambda-architecture.png" alt="lambda-architecture" width="500" />
-</div>
+
+
+![lambda-architecture](/images/chapters/21-ad-click-event-aggregation/lambda-architecture.png)
+
+
 
 Kappa architecture:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/21-ad-click-event-aggregation/kappa-architecture.png" alt="kappa-architecture" width="500" />
-</div>
+
+
+![kappa-architecture](/images/chapters/21-ad-click-event-aggregation/kappa-architecture.png)
+
+
 
 Our high-level design uses Kappa architecture as reprocessing of historical data also goes through the aggregation service.
 
@@ -325,9 +349,11 @@ Whenever we have to recalculate aggregated data due to eg a major bug in aggrega
  - Retrieved data is sent to a dedicated aggregation service, so that the real-time processing aggregation service is not impacted.
  - Aggregated results are sent to the second message queue, after which we update the results in the aggregation database.
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/21-ad-click-event-aggregation/recalculation-example.png" alt="recalculation-example" width="500" />
-</div>
+
+
+![recalculation-example](/images/chapters/21-ad-click-event-aggregation/recalculation-example.png)
+
+
 
 ### **Time**
 We need a timestamp to perform aggregation. It can be generated in two places:
@@ -350,16 +376,20 @@ To mitigate the issue of delayed events, a technique called "watermark" can be l
 
 In the example below, event 2 misses the window where it needs to be aggregated:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/21-ad-click-event-aggregation/watermark-technique.png" alt="watermark-technique" width="500" />
-</div>
+
+
+![watermark-technique](/images/chapters/21-ad-click-event-aggregation/watermark-technique.png)
+
+
 
 However, if we purposefully extend the aggregation window, we can reduce the likelihood of missed events.
 The extended part of a window is called a "watermark":
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/21-ad-click-event-aggregation/watermark-2.png" alt="watermark-2" width="500" />
-</div>
+
+
+![watermark-2](/images/chapters/21-ad-click-event-aggregation/watermark-2.png)
+
+
 
  - Short watermark increases likelihood of missed events, but reduces latency
  - Longer watermark reduces likelihood of missed events, but increases latency
@@ -377,15 +407,19 @@ There are four types of window functions:
 
 In our design, we leverage a tumbling window for ad click aggregations:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/21-ad-click-event-aggregation/tumbling-window.png" alt="tumbling-window" width="500" />
-</div>
+
+
+![tumbling-window](/images/chapters/21-ad-click-event-aggregation/tumbling-window.png)
+
+
 
 As well as a sliding window for the top N clicked ads in M minutes aggregation:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/21-ad-click-event-aggregation/sliding-window.png" alt="sliding-window" width="500" />
-</div>
+
+
+![sliding-window](/images/chapters/21-ad-click-event-aggregation/sliding-window.png)
+
+
 
 ### **Delivery guarantees**
 Since the data we're aggregating is going to be used for billing, data accuracy is a priority.
@@ -409,23 +443,29 @@ It can come from a wide range of sources:
 
 Here's an example of data duplication occurring due to failure to acknowledge an event on the last hop:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/21-ad-click-event-aggregation/data-duplication-example.png" alt="data-duplication-example" width="500" />
-</div>
+
+
+![data-duplication-example](/images/chapters/21-ad-click-event-aggregation/data-duplication-example.png)
+
+
 
 In this example, offset 100 will be processed and sent downstream multiple times.
 
 One option to try and mitigate this is to store the last seen offset in HDFS/S3, but this risks the result never reaching downstream:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/21-ad-click-event-aggregation/data-duplication-example-2.png" alt="data-duplication-example-2" width="500" />
-</div>
+
+
+![data-duplication-example-2](/images/chapters/21-ad-click-event-aggregation/data-duplication-example-2.png)
+
+
 
 Finally, we can store the offset while interacting with downstream atomically. To achieve this, we need to implement a distributed transaction:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/21-ad-click-event-aggregation/data-duplication-example-3.png" alt="data-duplication-example-3" width="500" />
-</div>
+
+
+![data-duplication-example-3](/images/chapters/21-ad-click-event-aggregation/data-duplication-example-3.png)
+
+
 
 **Personal side-note**: Alternatively, if the downstream system handles the aggregation result idempotently, there is no need for a distributed transaction.
 
@@ -442,15 +482,19 @@ How do we scale the message queue:
  - Also, consumer rebalancing can take a while when there are thousands of consumers so it is recommended to do it off peak hours
  - We could also consider partitioning the topic by geography, eg `topic_na`, `topic_eu`, etc.
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/21-ad-click-event-aggregation/scale-consumers.png" alt="scale-consumers" width="500" />
-</div>
+
+
+![scale-consumers](/images/chapters/21-ad-click-event-aggregation/scale-consumers.png)
+
+
 
 How do we scale the aggregation service:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/21-ad-click-event-aggregation/aggregation-service-scaling.png" alt="aggregation-service-scaling" width="500" />
-</div>
+
+
+![aggregation-service-scaling](/images/chapters/21-ad-click-event-aggregation/aggregation-service-scaling.png)
+
+
 
  - The map-reduce nodes can easily be scaled by adding more nodes
  - The throughput of the aggregation service can be scaled by by utilising multi-threading
@@ -458,24 +502,30 @@ How do we scale the aggregation service:
  - Option 1 is easier, but option 2 is more widely used in practice as it's more scalable
  - Here's the multi-threading example:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/21-ad-click-event-aggregation/multi-threading-example.png" alt="multi-threading-example" width="500" />
-</div>
+
+
+![multi-threading-example](/images/chapters/21-ad-click-event-aggregation/multi-threading-example.png)
+
+
 
 How do we scale the database:
  - If we use Cassandra, it natively supports horizontal scaling utilizing consistent hashing
  - If a new node is added to the cluster, data automatically gets rebalanced across all (virtual) nodes
  - With this approach, no manual (re)sharding is required
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/21-ad-click-event-aggregation/cassandra-scalability.png" alt="cassandra-scalability" width="500" />
-</div>
+
+
+![cassandra-scalability](/images/chapters/21-ad-click-event-aggregation/cassandra-scalability.png)
+
+
 
 Another scalability issue to consider is the hotspot issue - what if an ad is more popular and gets more attention than others?
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/21-ad-click-event-aggregation/hotspot-issue.png" alt="hotspot-issue" width="500" />
-</div>
+
+
+![hotspot-issue](/images/chapters/21-ad-click-event-aggregation/hotspot-issue.png)
+
+
 
  - In the above example, aggregation service nodes can apply for extra resources via the resource manager
  - The resource manager allocates more resources, so the original node isn't overloaded
@@ -494,15 +544,19 @@ However, there is additional intermediary state we need to maintain, as we're ag
 
 We can make snapshots at a particular minute for the on-going aggregation:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/21-ad-click-event-aggregation/fault-tolerance-example.png" alt="fault-tolerance-example" width="500" />
-</div>
+
+
+![fault-tolerance-example](/images/chapters/21-ad-click-event-aggregation/fault-tolerance-example.png)
+
+
 
 If a node goes down, the new node can read the latest committed consumer offset, as well as the latest snapshot to continue the job:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/21-ad-click-event-aggregation/fault-tolerance-recovery-example.png" alt="fault-tolerance-recovery-example" width="500" />
-</div>
+
+
+![fault-tolerance-recovery-example](/images/chapters/21-ad-click-event-aggregation/fault-tolerance-recovery-example.png)
+
+
 
 ### **Data monitoring and correctness**
 As the data we're aggregating is critical as it's used for billing, it is very important to have rigorous monitoring in place in order to ensure correctness.
@@ -515,9 +569,11 @@ Some metrics we might want to monitor:
 We also need to implement a reconciliation flow which is a batch job, running at the end of the day. 
 It calculates the aggregated results from the raw data and compares them against the actual data stored in the aggregation database:
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/21-ad-click-event-aggregation/reconciliation-flow.png" alt="reconciliation-flow" width="500" />
-</div>
+
+
+![reconciliation-flow](/images/chapters/21-ad-click-event-aggregation/reconciliation-flow.png)
+
+
 
 ### **Alternative design**
 In a generalist system design interview, you are not expected to know the internals of specialized software used in big data processing.
@@ -528,9 +584,11 @@ An alternative design, which leverages off-the-shelf tooling, is to store ad cli
 
 Aggregation is typically done in OLAP databases such as ClickHouse or Druid.
 
-<div style="margin-left:3rem">
-    <img src="/images/chapters/21-ad-click-event-aggregation/alternative-design.png" alt="alternative-design" width="500" />
-</div>
+
+
+![alternative-design](/images/chapters/21-ad-click-event-aggregation/alternative-design.png)
+
+
 
 ---
 
