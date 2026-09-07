@@ -5,10 +5,16 @@ export default function HomePage() {
   return (
     <div className="flex flex-col items-center justify-center flex-1 max-w-5xl mx-auto px-6 py-16 text-center">
       {/* Badge */}
-      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-fd-secondary text-fd-secondary-foreground border border-fd-border mb-6">
+      <a
+        href="https://harshal.pro"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-medium bg-fd-secondary text-fd-secondary-foreground border border-fd-border mb-6 hover:bg-fd-accent transition-colors"
+      >
         <Zap className="w-3.5 h-3.5 text-fd-primary" />
-        <span>The Modern System Design Knowledge Base</span>
-      </div>
+        <span>by harshal.pro</span>
+        <span className="text-fd-muted-foreground">• System Design Knowledge Base</span>
+      </a>
 
       {/* Main Headline */}
       <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-fd-foreground max-w-3xl mb-6">
@@ -27,7 +33,7 @@ export default function HomePage() {
           className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-semibold bg-fd-primary text-fd-primary-foreground hover:opacity-90 transition-opacity shadow-sm"
         >
           <BookOpen className="w-4 h-4" />
-          Read The Codex
+          Explore System Design
           <ArrowRight className="w-4 h-4" />
         </Link>
         <Link

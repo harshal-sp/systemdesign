@@ -1,4 +1,5 @@
-# System Design Codex
+# System Design
+### by [harshal.pro](https://harshal.pro)
 
 A modern, comprehensive System Design & Distributed Systems knowledge platform built with [Fumadocs](https://fumadocs.dev) and Next.js Static Export, designed for high-performance hosting on Cloudflare Pages.
 
@@ -52,5 +53,5 @@ The static site will be generated in `out/`.
 
 ### Option 2: Direct Wrangler CLI
 ```bash
-npx wrangler pages deploy out --project-name system-design-codex
+npx wrangler pages deploy out --project-name systemdesign
 ```

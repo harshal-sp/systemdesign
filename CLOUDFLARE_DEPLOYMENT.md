@@ -42,10 +42,10 @@ You can build and deploy the `out/` folder in one command:
 npm run build
 
 # 2. Deploy directly to Cloudflare Pages
-npx wrangler pages deploy out --project-name system-design-codex
+npx wrangler pages deploy out --project-name systemdesign
 
 # 3. Bind your custom domain
-npx wrangler pages domain set system-design-codex <your-domain.com>
+npx wrangler pages domain set systemdesign <your-domain.com>
 ```
 
 ---
