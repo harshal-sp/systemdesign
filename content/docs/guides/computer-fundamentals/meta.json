@@ -1,0 +1,17 @@
+{
+  "title": "Computer Fundamentals",
+  "pages": [
+    "dns-record-types-you-should-know",
+    "explaining-8-popular-network-protocols-in-1-diagram",
+    "how-does-the-domain-name-system-dns-lookup-work",
+    "ipv4-vs-ipv6",
+    "top-4-most-popular-use-cases-for-udp",
+    "visualizing-a-sql-query",
+    "what-are-the-differences-between-paging-and-segmentation",
+    "what-is-a-deadlock",
+    "what-is-osi-model",
+    "what-is-the-best-way-to-learn-sql",
+    "what-is-the-difference-between-process-and-thread",
+    "what-protocol-does-online-gaming-use-to-transmit-data"
+  ]
+}

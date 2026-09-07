@@ -1,0 +1,25 @@
+{
+  "title": "DevTools & Productivity",
+  "pages": [
+    "15-open-source-projects-that-changed-the-world",
+    "20-popular-open-source-projects-started-or-supported-by-big-companies",
+    "30-useful-ai-apps-that-can-help-you-in-2025",
+    "5-important-components-of-linux",
+    "diagram-as-code",
+    "git-commands-cheat-sheet",
+    "git-merge-vs-git-rebate",
+    "git-vs-github",
+    "git-workflow",
+    "how-do-companies-ship-code-to-production",
+    "how-does-git-work",
+    "json-files",
+    "life-is-short-use-dev-tools",
+    "linux-file-permission-illustrated",
+    "linux-file-system-explained",
+    "making-sense-of-search-engine-optimization",
+    "most-used-linux-commands-map",
+    "top-6-tools-to-turn-code-into-beautiful-diagrams",
+    "top-9-cases-behind-100-cpu-usage",
+    "what-tools-does-your-team-use-to-ship-code-to-production-and-ensure-code-quality"
+  ]
+}

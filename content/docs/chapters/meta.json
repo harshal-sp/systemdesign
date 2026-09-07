@@ -1,0 +1,33 @@
+{
+  "title": "Masterclasses (28)",
+  "pages": [
+    "01-scaling",
+    "02-back-of-the-envelope-estimation",
+    "03-system-design-framework",
+    "04-rate-limiter",
+    "05-consistent-hashing",
+    "06-key-value-store",
+    "07-unique-id-generator",
+    "08-url-shortener",
+    "09-web-crawler",
+    "10-notification-system",
+    "11-news-feed-system",
+    "12-chat-system",
+    "13-search-autocomplete",
+    "14-youtube",
+    "15-google-drive",
+    "16-proximity-service",
+    "17-nearby-friends",
+    "18-google-maps",
+    "19-distributed-message-queue",
+    "20-metrics-monitoring-and-alerting-system",
+    "21-ad-click-event-aggregation",
+    "22-hotel-reservation-system",
+    "23-distributed-email-service",
+    "24-s3-like-object-storage",
+    "25-real-time-gaming-leaderboard",
+    "26-payment-system",
+    "27-digital-wallet",
+    "28-stock-exchange"
+  ]
+}

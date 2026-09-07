@@ -1,0 +1,20 @@
+{
+  "title": "Visual Guides (400)",
+  "pages": [
+    "ai-machine-learning",
+    "api-web-development",
+    "caching-performance",
+    "cloud-distributed-systems",
+    "computer-fundamentals",
+    "database-and-storage",
+    "devops-cicd",
+    "devtools-productivity",
+    "how-it-works",
+    "payment-and-fintech",
+    "real-world-case-studies",
+    "security",
+    "software-architecture",
+    "software-development",
+    "technical-interviews"
+  ]
+}

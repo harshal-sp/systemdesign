@@ -1,0 +1,31 @@
+{
+  "title": "DevOps and CI/CD",
+  "pages": [
+    "9-docker-best-practices-you-must-know",
+    "choose-the-right-database-for-metric-collecting-system",
+    "cicd-pipeline-explained-in-simple-terms",
+    "cicd-simplified-visual-guide",
+    "cloud-native-anti-patterns",
+    "devops-vs-noops",
+    "devops-vs-sre-vs-paltform-engg",
+    "how-does-docker-work",
+    "how-does-terraform-turn-code-into-cloud",
+    "how-to-deploy-services",
+    "kubernetes-deployment-strategies",
+    "kubernetes-periodic-table",
+    "kubernetes-tools-ecosystem",
+    "kubernetes-tools-stack-wheel",
+    "log-parsing-cheat-sheet",
+    "logging-tracing-metrics",
+    "paradigm-shift-how-developer-to-tester-ratio-changed-from-11-to-1001",
+    "push-vs-pull-in-metrics-collecting-systems",
+    "some-devops-books-i-find-enlightening",
+    "the-ultimate-kubernetes-command-cheatsheet",
+    "top-10-k8s-design-patterns",
+    "top-4-kubernetes-service-types-in-one-diagram",
+    "top-5-most-used-deployment-strategies",
+    "top-8-must-know-docker-concepts",
+    "what-is-k8s-kubernetes",
+    "why-is-nginx-so-popular"
+  ]
+}

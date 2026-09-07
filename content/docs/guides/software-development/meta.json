@@ -1,0 +1,31 @@
+{
+  "title": "Software Development",
+  "pages": [
+    "10-books-for-software-developers",
+    "10-good-coding-principles-to-improve-code-quality",
+    "10-key-data-structures-we-use-every-day",
+    "11-steps-to-go-from-junior-to-senior-developer",
+    "a-brief-history-og-programming-languages",
+    "a-roadmap-for-full-stack-development",
+    "algorithms-you-should-know-before-taking-system-design-interviews",
+    "big-endian-vs-little-endian",
+    "blocking-vs-non-blocking-queue",
+    "concurrency-is-not-parallelism",
+    "how-do-c++-java-python-work",
+    "how-does-garbage-collection-work",
+    "how-is-data-transmitted-between-applications",
+    "how-to-avoid-crawling-duplicate-urls-at-google-scale",
+    "imperative-vs-functional-vs-object-oriented-programming",
+    "is-it-possible-to-run-c-c++-or-rust-on-a-web-browser",
+    "java-collection-hierarchy",
+    "the-9-algorithms-that-dominate-our-world",
+    "the-fundamental-pillars-of-object-oriented-programming",
+    "top-6-load-balancing-algorithms",
+    "top-6-most-commonly-used-server-types",
+    "top-6-multithreading-design-patterns-you-must-know",
+    "top-8-c++-use-cases",
+    "top-8-programming-paradigms",
+    "top-8-standards-every-developer-should-know",
+    "what-are-the-greenest-programming-languages"
+  ]
+}

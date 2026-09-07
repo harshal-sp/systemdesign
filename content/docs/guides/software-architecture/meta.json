@@ -1,0 +1,29 @@
+{
+  "title": "Software Architecture",
+  "pages": [
+    "10-system-design-tradeoffs-you-cannot-ignore",
+    "18-key-design-patterns-every-developer-should-know",
+    "6-software-architectural-patterns-you-must-know",
+    "8-common-system-design-problems-and-solutions",
+    "8-key-concepts-in-ddd",
+    "8-key-oop-concepts-every-developer-should-know",
+    "9-best-practices-for-building-microservices",
+    "9-best-practices-for-developing-microservices",
+    "9-essential-components-of-a-production-microservice-application",
+    "a-cheatsheet-for-uml-class-diagrams",
+    "amazon-prime-video-monitoring-service",
+    "database-middleware",
+    "design-patterns-cheat-sheet-part-1-and-part-2",
+    "how-do-computer-programs-run",
+    "how-do-processes-talk-to-each-other-on-linux",
+    "how-to-release-a-mobile-app",
+    "is-microservice-architecture-the-silver-bullet",
+    "key-terms-in-domain-driven-design",
+    "linux-boot-process-explained",
+    "mvc-mvp-mvvm-viper-patterns",
+    "orchestration-vs-choreography-microservices",
+    "the-ultimate-software-architect-knowledge-map",
+    "top-5-software-architectural-patterns",
+    "what-does-a-typical-microservice-architecture-look-like"
+  ]
+}

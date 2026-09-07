@@ -1,0 +1,22 @@
+{
+  "title": "How it Works?",
+  "pages": [
+    "build-a-simple-chat-application",
+    "design-gmail",
+    "design-google-maps",
+    "design-stock-exchange",
+    "how-are-notifications-pushed-to-our-phones-or-pcs",
+    "how-do-airtags-work",
+    "how-do-googleapple-maps-blur-license-plates-and-human-faces-on-street-view",
+    "how-do-search-engines-work",
+    "how-do-we-design-a-chat-application-like-whatsapp-facebook-messenger-or-discord",
+    "how-do-we-design-a-system-for-internationalization",
+    "how-is-email-delivered",
+    "how-to-design-google-docs",
+    "live-streaming-explained",
+    "possible-experiment-platform-architecture",
+    "proximity-service",
+    "quadtree",
+    "what-happens-when-you-upload-a-file-to-amazon-s3"
+  ]
+}
